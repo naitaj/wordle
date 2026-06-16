@@ -1,92 +1,122 @@
-# Wordle Auto-Solver Architectural Flow
+# Wordle Autonomous Agent Architectural Flow
 
-This document outlines the end-to-end architectural flow of the Wordle auto-solver, detailing how it combines Information Theory (Entropy) and Large Language Models (Groq AI) to systematically crack the game.
+This document outlines the end-to-end architectural flow of the browser-integrated Wordle Autonomous Agent, detailing how it connects a Manifest V3 Chrome Extension to the live New York Times Wordle page, and combines Information Theory (Entropy) with Large Language Models (Groq AI) to solve the game.
 
-## 1. Initialization and Input Validation
-When a game starts, the solver initializes its state. 
-- **Standard Game:** The target word is randomly selected from a curated list of 2,309 common English words (`answerList`).
-- **Custom Game:** The user types a custom 5-letter target. 
-  > [!IMPORTANT]  
-  > The system performs a strict validation check to ensure the custom word exists in the 12,000-word official dictionary (`wordList`). If it does not exist (e.g., plurals like `KNEES`), the game blocks the input. This prevents mathematical paradoxes where the target word drops the remaining valid words pool to zero.
+## 1. Extension Architecture Overview
 
-## 2. The Entropy Engine (Attempts 1-4)
-For the first four guesses, the solver operates in **Strict Hard Mode** driven by Information Theory.
+The agent is split into three main layers that communicate asynchronously via Chrome Runtime APIs:
 
-### Filtering (`filterWordList`)
-After every guess, the engine evaluates the visual clues (Greens, Yellows, Grays) and applies strict logical constraints to the remaining candidate pool:
-- **Greens:** Must remain in their exact positions.
-- **Yellows:** Must be included in the word, but in a different position.
-- **Grays:** Must be completely eliminated (unless duplicates exist).
+```mermaid
+graph TB
+    subgraph "Chrome Extension"
+        subgraph "Popup UI"
+            UI["popup.tsx<br>(React + TailwindCSS)"]
+        end
+        subgraph "Service Worker (Background)"
+            SW["background.ts<br>(Message Router & Controller)"]
+            SE["Solver Engine<br>(entropySolver, wordleRules, solverOrchestrator)"]
+            DATA["Word Lists<br>(answerList, wordList)"]
+        end
+        subgraph "Content Script"
+            CS["content.ts<br>(DOM Bridge)"]
+            SEL["selectors.ts<br>(Selector Abstraction Layer)"]
+        end
+    end
+    
+    NYT["NYT Wordle Page DOM"]
+    GROQ["Groq API"]
+    
+    UI <-->|chrome.runtime messages| SW
+    SW <-->|chrome.tabs messages| CS
+    CS <-->|DOM Read/Write| NYT
+    SW -->|fetch| GROQ
+    SE --> SW
+    DATA --> SE
+```
 
-### Scoring (`rankGuesses`)
-The remaining valid candidates are scored based on their **Entropy** (information gain).
-1. The solver calculates how evenly a potential guess would split the remaining candidates into different clue outcomes (e.g., how many candidates result in `G-Y-X-X-G`, how many in `X-X-X-X-X`, etc.).
-2. Words that evenly divide the pool into small, distinct buckets yield high entropy.
-3. The candidates are sorted by entropy, and the highest scorer is selected.
-
-> [!TIP]
-> By strictly restricting the solver to score *only* valid candidates during attempts 1-4, it mathematically obeys Hard Mode constraints. It will never guess an eliminated letter or move a discovered Green letter.
-
-## 3. The Exploratory Breakout (Attempt 5)
-In Wordle, you can fall into "traps"—words with identical structures differing by a single consonant (e.g., `HATCH`, `BATCH`, `MATCH`, `PATCH`). In strict Hard Mode, testing these one by one will exhaust your 6 guesses.
-
-To combat this, the solver utilizes a specific heuristic on the 5th attempt:
-- **Condition:** If it is the 5th attempt (`currentRow === 4`) and there are still multiple valid candidates left.
-- **Action:** The solver intentionally breaks out of Hard Mode. Instead of only scoring the valid candidates, it scans the *entire 12,000-word dictionary* to find an **Exploratory Guess**.
-- **Result:** It finds a word (often gibberish or unrelated to the target) that perfectly tests the remaining untried consonants (e.g., guessing `CHAMP` to test C, M, P all at once).
-
-## 4. The Final Strike (Attempt 6)
-Armed with the massive information gain from the 5th exploratory guess, the solver narrows the remaining candidates down (almost always to a single word) and secures the win on the 6th and final attempt.
-
-## 5. The LLM Fallback (Groq AI)
-If the mathematical engine ever finds itself in a state where **zero valid words remain** (historically caused by an invalid custom target), the system falls back to a Large Language Model (Groq / Llama-3).
-
-### Strict Prompt Injection
-Because LLMs struggle with executing rigid positional logic in their neural networks, they frequently hallucinate invalid guesses (like placing an E in a position that was already marked gray).
-
-To prevent this, the solver acts as a rigid guardrail:
-1. The solver locally computes the exact subset of the 12,000-word dictionary that perfectly matches all visual clues gathered so far.
-2. It explicitly injects this pre-validated list into the LLM's prompt.
-3. It instructs the LLM: *"The ONLY dictionary words that perfectly match all Green/Yellow/Gray clues are: `[VALID_WORD_1, VALID_WORD_2]`. You MUST pick your guess from this list."*
-
-This effectively converts a complex spatial-logic puzzle into a simple multiple-choice selection for the LLM, neutralizing its tendency to hallucinate invalid word structures.
+1. **Popup UI (`popup.tsx`):** A glassmorphism dark-themed control center where the user activates the solver (Auto Play or Assist Mode), configures settings (Hard Mode, LLM Fallback, Typing delay), and views live analytics (remaining words, entropy, win probability, top candidates).
+2. **Service Worker / Background Script (`background.ts`):** The brain of the extension. It runs the core solve loop, manages state, computes candidate entropy, persists configuration using `chrome.storage.local`, and handles cross-origin API calls to the Groq LLM endpoint.
+3. **Content Script (`content.ts` & `selectors.ts`):** The eyes and hands of the agent. Injected into the NYT Wordle page, it reads the tile letters and states, simulates keyboard input, submits guesses, and monitors animations via `MutationObserver`.
 
 ---
 
+## 2. DOM Reading & Input Simulation
+
+Rather than managing a simulated board in local memory, the agent reads and writes directly to the live NYT website DOM:
+
+### DOM State Detection
+- **Tiles & Rows:** Found using robust selectors (`[data-state]` and `[role="group"]`).
+- **States:** Read from the `data-state` attribute (`empty`, `tbd`, `correct`, `present`, `absent`).
+- **Game State:** Evaluated dynamically from the DOM tiles and verified via the browser's `localStorage` (checking the `nyt-wordle-state` game status key).
+
+### Input Simulation
+- **Keystrokes:** Triggered by dispatching `KeyboardEvent` (`keydown`) on the page `window` and `document` contexts, allowing letters to be inputted.
+- **Enter Key:** Dispatched to submit guesses.
+- **Human-like Delay:** Letters are typed sequentially with a configurable delay (typically ~120ms) to ensure stability and mimic human input speed.
+
+---
+
+## 3. The Solve Loop Workflow
+
 ```mermaid
-graph TD
-    A[Game Starts] --> B{Valid Dictionary Word?}
-    B -- No --> C[Block Input & Alert User]
-    B -- Yes --> D[Filter Remaining Words]
+sequenceDiagram
+    participant User
+    participant Popup
+    participant SW as Service Worker (Background)
+    participant CS as Content Script (DOM)
+    participant NYT as NYT Wordle Website
+
+    User->>Popup: Click "Start Solving" (Auto)
+    Popup->>SW: { type: 'START_SOLVER', mode: 'auto' }
     
-    D --> E{Remaining Words == 0?}
-    E -- Yes --> F[Compute Valid Subset from Full Dict]
-    F --> G[Inject Valid List into Groq Prompt]
-    G --> H[LLM Picks from Provided List]
-    H --> I[Submit Guess]
+    SW->>CS: { type: 'READ_BOARD' }
+    CS->>NYT: Read rows, tiles, and status
+    NYT-->>CS: Current letters & data-states
+    CS-->>SW: { success: true, data: BoardState }
+
+    loop Solver Loop (Max 6 attempts)
+        alt Attempt 1
+            SW->>SW: Select hardcoded opener "ADIEU"
+        else Attempts 2+
+            SW->>SW: Filter word pool based on tile clues
+            SW->>SW: Rank valid words by Shannon Entropy
+            SW->>SW: Apply exploratory breakout heuristic if needed
+        end
+
+        SW->>Popup: { type: 'SOLVER_UPDATE', state }
+        SW->>CS: { type: 'TYPE_WORD', word, delay }
+        CS->>NYT: Dispatch keydown events for letters
+        SW->>CS: { type: 'SUBMIT_GUESS' }
+        CS->>NYT: Dispatch keydown (Enter)
+
+        SW->>CS: { type: 'WAIT_REVEAL', row }
+        Note over CS,NYT: MutationObserver waits for data-state reveal animations
+        CS-->>SW: { success: true, data: TileResult[] }
+        
+        SW->>CS: { type: 'READ_BOARD' }
+        CS-->>SW: BoardState (checks if Won or Lost)
+    end
     
-    E -- No --> J{Is it Attempt 1?}
-    J -- Yes --> K[Use Configurable Default Opener]
-    J -- No --> L{Hard Mode Enabled?}
-    
-    L -- Yes --> M[Score ONLY Valid Candidates]
-    L -- No --> N{Are Candidates > 1?}
-    
-    N -- No --> M
-    N -- Yes --> O[Score FULL Dictionary]
-    
-    M --> P[Sort by Entropy]
-    O --> P
-    P --> Q{Marginal Gain > 0.15<br>& Win Prob < 0.34?}
-    Q -- Yes --> R[Exploratory Breakout Guess]
-    Q -- No --> S[Top Valid Candidate Guess]
-    
-    R --> I
-    S --> I
-    K --> I
-    
-    I --> T[Increment currentRow]
-    T --> U{Solved or Out of Guesses?}
-    U -- No --> D
-    U -- Yes --> V[End Game]
+    SW->>Popup: { type: 'SOLVER_UPDATE', phase: 'won'/'lost' }
 ```
+
+---
+
+## 4. Decision Engine Heuristics
+
+The agent maintains the mathematical engine from the original Entropy Solver:
+
+### Shannon Entropy Computation
+Candidates are ranked by how much information they are expected to yield. For each candidate word, the solver calculates the distribution of hypothetical clues it would produce across the remaining answer pool:
+\[E(w) = - \sum_{i} p_i \log_2(p_i)\]
+Where \(p_i\) is the probability of obtaining clue pattern \(i\). The word with the highest entropy is selected.
+
+### Dynamic Exploratory Breakout
+To avoid consonant traps (e.g. `_ATCH` where the answer could be `HATCH`, `BATCH`, `PATCH`, `MATCH`, etc.), the agent evaluates the full dictionary:
+- **Condition:** If the best full-dictionary guess yields a marginal entropy gain `> 0.15 bits` compared to the best valid candidate AND the current win probability is `< 34%`.
+- **Action:** The solver breaks Hard Mode and plays an exploratory guess containing as many untried consonants as possible to narrow down the target.
+
+### LLM Fallback (Groq AI)
+If the pool of remaining valid candidates drops to zero (due to a rare dictionary mismatch or unexpected state), and `llmFallbackEnabled` is true, the service worker sends a structured prompt to Groq's `llama-3.3-70b-versatile` model:
+- The prompt explicitly lists the constraints and matches computed from the dictionary.
+- The LLM is forced to select a word from the remaining valid subset, eliminating hallucinated invalid word guesses.
