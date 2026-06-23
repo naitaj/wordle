@@ -1,89 +1,59 @@
-# AI Wordle Auto-Solver 🤖🟩🟨
+# Wordle Entropy Solver
 
-[![Wordle Auto-Solver](https://img.shields.io/badge/Status-Production%20Ready-success.svg)](#)
-[![GitHub Repository](https://img.shields.io/badge/GitHub-View_Repository-blue?logo=github)](https://github.com/naitaj/wordle)
+This project is a browser extension that plays Wordle for you or helps you play better by suggesting words. It works on both the official New York Times Wordle page and the wordle.name clone. The solver uses information theory to calculate which guesses will reveal the most information, aiming to solve the game in the fewest moves possible.
 
-An intelligent, autonomous auto-solver for the popular game Wordle. Built using advanced Information Theory (Entropy calculations) to deterministically solve puzzles, backed by a Large Language Model (Groq / LLaMA-3) fallback system to handle extreme edge cases and zero-candidate puzzle states. 
+## What it does
 
-The solver visually types out its guesses, evaluates hints, and recalculates optimal paths in real-time within a beautiful, responsive UI.
+The extension runs in two modes:
 
----
+* Auto Solve: The extension reads the board, chooses the best word, types it out, and presses enter. It repeats this until the game is won or lost.
+* Assist Mode: The extension sits on the side and suggests the best word to play next. It updates its recommendations automatically as you enter guesses on the page.
 
-## 🚀 Tech Stack
+To prevent the extension popup from covering the Wordle board or keyboard, the content script automatically shifts the webpage layout to the left. This creates a clear space on the right of the screen where the solver fits perfectly.
 
-### Core Technologies
-- **React 18** - Frontend UI library
-- **TypeScript** - Strict static typing for resilient solver logic
-- **Vite** - High-performance build tool and dev server
-- **TailwindCSS** - Rapid utility-first styling and glassmorphic UI
+## How it calculates guesses
 
-### AI & Computational Algorithms
-- **Information Theory Engine** - Calculates Shannon Entropy ($-\sum p \log_2 p$) for thousands of possible word permutations asynchronously.
-- **Web Workers** - Dedicated multi-threading (`entropy.worker.ts`) to offload heavy $O(N^2)$ candidate ranking without blocking the UI thread.
-- **Groq API (LLaMA-3)** - Fallback LLM generation using prompt injection to guarantee syntactically legal exploratory guesses when the solver hits impossible mathematical constraints.
+The core algorithm uses Shannon entropy to score every available word. The entropy represents the expected amount of information a guess will reveal by looking at how it splits the remaining possible answers into groups. 
 
----
+The solver starts with an optimal opening word, usually ADIEU, to gather maximum initial data. For subsequent guesses, it filters the dictionary based on the green, yellow, and gray tile feedback. If the candidate pool is large, it may play an exploratory word to eliminate multiple letters at once. If the pool of words drops to zero due to custom words, it falls back to a LLaMA 3 model via the Groq API to suggest a best-effort guess.
 
-## 🛠 Usage & Installation
+The win probability indicator calculates your real chance of winning the game. Instead of a simple one-in-N fraction, it uses the remaining attempts and the entropy of the best guess to estimate how many guesses are needed to solve the remaining words.
 
-### Prerequisites
-- Node.js (v18+)
-- A Groq API Key (required for LLM fallback capabilities)
+## Interface design
 
-### Setup
-1. **Clone the repository:**
+The interface is built with a high-contrast, modernist layout inspired by industrial signage. It features:
+* A compact width of 320 pixels and height of 600 pixels to fit comfortably on the screen.
+* Global styling that hides scrollbars for a cleaner panel layout.
+* Clear typography using the Oswald font.
+* A centered attempts divider with status indicators aligned to the far right.
+* Flat black action buttons with simple line icons.
+
+## Setting it up
+
+To build and run the extension locally:
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/naitaj/wordle.git
    cd wordle
    ```
 
-2. **Install dependencies:**
+2. Install the project dependencies:
    ```bash
    npm install
    ```
 
-3. **Configure Environment Variables:**
-   Create a `.env` file in the root directory and add your API keys:
-   ```env
-   VITE_GROQ_API_KEY=your_groq_api_key_here
-   ```
-   *(Note: The `.env` file is git-ignored automatically to protect your secrets).*
-
-4. **Run the Development Server:**
+3. Build the extension:
    ```bash
-   npm run dev
+   node extension/build.js
    ```
+   This compiles the popup, background worker, and content scripts, outputting them to the `extension/dist` folder.
 
-5. **Build for Production:**
-   ```bash
-   npm run build
-   npm run preview
-   ```
+4. Load it in Chrome:
+   * Open `chrome://extensions/` in your browser.
+   * Turn on Developer Mode in the top right.
+   * Click Load Unpacked in the top left.
+   * Select the `extension/dist` directory.
 
----
-
-## 🧠 Architecture
-
-The auto-solver is designed around a strictly deterministic, non-blocking pipeline:
-
-1. **State Management:** The game is driven by a custom React hook (`useAutoSolver.ts`) that manages an internal `SolverState` machine transitioning between `idle -> thinking -> typing -> evaluating -> won/lost`.
-2. **Strict Filtering Pipeline:** `wordleRules.ts` implements exhaustive constraint checking (both positional bounds and absolute letter counts) against every candidate word.
-3. **Asynchronous Entropy Worker:** The `entropy.worker.ts` computes the expected information gain of every legal dictionary word against the remaining candidate pool, running purely on a background thread.
-4. **Deterministic Tie-Breaking:** Ties in entropy scores are broken via a rigid 4-step pipeline: Target Dictionary Inclusion $\rightarrow$ Max Unique Letters $\rightarrow$ Word Frequency Rank Proxy $\rightarrow$ Alphabetical Fallback.
-
----
-
-## 🔄 The Solver Workflow
-
-The engine executes the following logic loop for each guess:
-
-1. **Guess 1:** Bypasses calculation and types a pre-configured optimal opening word (e.g., `ADIEU` or `CRANE`).
-2. **Evaluate & Filter:** The guess is submitted, coloring logic applied, and the dictionary is aggressively filtered to remove mathematically impossible words.
-3. **Entropy Ranking (Guesses 2-4):** The solver calculates Shannon entropy over the remaining pool. It prefers strict Hard Mode (valid candidates only) unless the marginal gain of exploring the full dictionary exceeds 0.15 bits with a low win probability.
-4. **Dynamic Exploratory Breakout:** If the solver detects a trap (e.g., `ATCH` words), it intentionally breaks Hard Mode, picking a full-dictionary word to eliminate maximum consonants simultaneously.
-5. **LLM Zero-Candidate Fallback:** If a user types a custom word that does *not* exist in the official Wordle dictionary, the solver's valid pool eventually drops to 0. In this invariant state, the solver injects the active puzzle constraints into the Groq API, forcing the LLM to hallucinate a "best effort" guess to keep the game alive.
-6. **Victory:** The solver routinely converges on the correct answer within 3-4 guesses.
-
----
-
-*Built with precision algorithms, Web Workers, and AI for the ultimate deterministic solving experience.*
+5. Optional Groq configuration:
+   If you want to use the LLaMA fallback, open the extension settings and paste your Groq API key.
