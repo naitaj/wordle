@@ -7,37 +7,44 @@ body {
 #wordle-solver-wrapper {
   position: fixed;
   top: 72px;
-  right: 12px;
+  right: 0px;
   z-index: 99999;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Bebas Neue', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  transform: translateX(10px); /* Move it further right so it doesn't cover keyboard */
+}
+
+#wordle-solver-wrapper:hover {
+  transform: translateX(0px); /* Slide in on hover */
 }
 
 #wordle-solver-badge {
-  background: rgba(16, 185, 129, 0.9);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #000000;
+  color: #ffffff;
+  padding: 0 20px;
+  height: 56px;
+  border-radius: 0px;
+  border: 1px solid #000000;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
   cursor: pointer;
   user-select: none;
-  letter-spacing: 0.02em;
 }
 
 #wordle-solver-badge:hover {
-  background: rgba(16, 185, 129, 1);
-  transform: scale(1.03);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  background: #18181b;
 }
 
 #wordle-solver-badge:active {
-  transform: scale(0.97);
+  background: #000000;
 }
 
 #wordle-solver-menu-btn {

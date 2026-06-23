@@ -88,7 +88,7 @@ export class SolverOrchestrator {
   private currentRow = 0;
   private topCandidates: ScoredWord[] = [];
   private expectedRemaining = 0;
-  private winProbability = 0;
+  private winProbability = 0.99;
 
   constructor(onUpdate: OnStateUpdate) {
     this.onUpdate = onUpdate;

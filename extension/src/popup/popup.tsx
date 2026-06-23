@@ -19,7 +19,7 @@ export function Popup() {
     remainingWords: [],
     currentGuess: '',
     expectedRemaining: 0,
-    winProbability: 0,
+    winProbability: 0.99,
     currentRow: 0,
   });
   const [error, setError] = useState<string | null>(null);
@@ -168,9 +168,9 @@ export function Popup() {
         
         {/* Settings Header */}
         <header className="bg-black text-white px-5 py-4 flex items-center justify-between border-b-2 border-black">
-          <div className="flex items-center gap-3">
+          <div className="flex items-baseline">
             <h1 className="text-xl font-black uppercase tracking-wider font-bebas text-white">SETTINGS</h1>
-            <div className="text-zinc-400 font-black text-lg tracking-[0.05em] select-none font-bebas">///</div>
+            <div className="text-zinc-400 font-black text-lg tracking-[0.05em] select-none font-bebas ml-1">///</div>
           </div>
           <button 
             onClick={() => setActiveTab('play')}
@@ -297,20 +297,22 @@ export function Popup() {
       <header className="flex items-center justify-between pb-3 border-b-2 border-black bg-transparent">
         <div className="flex items-center gap-3">
           {/* Taller / More Elongated Logo */}
-          <div className="h-20 w-12 bg-black flex items-center justify-center select-none shrink-0">
-            <span className="text-white font-oswald font-bold text-5xl tracking-normal pt-1 inline-block">W</span>
+          <div className="h-[88px] w-[52px] bg-black flex items-center justify-center select-none shrink-0">
+            <span className="text-white text-[56px] pt-2 inline-block" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400, letterSpacing: '0' }}>W</span>
           </div>
-          <div className="flex flex-col justify-center select-none">
-            <h1 className="text-[30px] font-oswald font-bold text-black uppercase leading-[0.9] tracking-[0.04em]">
-              WORDLE
-            </h1>
-            <h1 className="text-[30px] font-oswald font-bold text-black uppercase leading-[0.9] tracking-[0.04em]">
-              ENTROPY
-            </h1>
+          <div className="flex flex-col justify-center select-none ml-2 h-[88px]">
+            <div className="flex flex-col justify-center">
+              <h1 className="text-[36px] text-black uppercase leading-[0.9] tracking-[0.05em]" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400 }}>
+                WORDLE
+              </h1>
+              <h1 className="text-[36px] text-black uppercase leading-[0.9] tracking-[0.05em] mt-1" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400 }}>
+                ENTROPY
+              </h1>
+            </div>
             <p 
-              className="text-[11px] text-[#222222] font-bold uppercase mt-1"
+              className="text-[16px] text-[#222222] font-medium uppercase mt-2 leading-none"
               style={{
-                fontFamily: "'Roboto Condensed', 'DIN Condensed', 'Bahnschrift Condensed', sans-serif",
+                fontFamily: "'DIN Condensed', 'Bahnschrift Condensed', 'Roboto Condensed', sans-serif",
                 letterSpacing: '0.35em'
               }}
             >
