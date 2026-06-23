@@ -231,13 +231,209 @@ function readRowResults(rowIndex: number): TileResult[] | null {
   return results.length === 5 ? results : null;
 }
 
-// ─── Floating Status Badge ───
+let currentMode: 'auto' | 'assist' = 'auto';
+let assistLoopActive = false;
+
+async function startAssistLoop(startRow: number): Promise<void> {
+  if (assistLoopActive) return;
+  assistLoopActive = true;
+  
+  let r = startRow;
+  while (currentMode === 'assist' && r < 6) {
+    try {
+      // Wait for the user to type and enter a word, and for it to be revealed
+      await waitForReveal(r);
+      
+      // Word is revealed! Wait 300ms for animations to settle
+      await sleep(300);
+      
+      if (currentMode !== 'assist') break;
+      
+      // Automatically request the next recommendation
+      updateBadge('🧠 Thinking...');
+      
+      const response = await new Promise<any>((resolve) => {
+        chrome.runtime.sendMessage({ type: 'START_SOLVER', mode: 'assist' }, (res) => {
+          if (chrome.runtime.lastError) {
+            resolve({ success: false, error: chrome.runtime.lastError.message });
+          } else {
+            resolve(res);
+          }
+        });
+      });
+      
+      if (response?.success) {
+        const stateResponse = await new Promise<any>((resolve) => {
+          chrome.runtime.sendMessage({ type: 'GET_STATE' }, (res) => {
+            if (chrome.runtime.lastError) {
+              resolve({ success: false });
+            } else {
+              resolve(res);
+            }
+          });
+        });
+        
+        if (stateResponse?.success && stateResponse.data) {
+          const state = stateResponse.data;
+          if (state.currentGuess) {
+            updateBadge(`💡 Rec: ${state.currentGuess}`);
+          } else {
+            updateBadge('💡 No Rec');
+          }
+          r = state.currentRow;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    } catch (err: any) {
+      if (err.message === 'NOT_IN_WORD_LIST') {
+        continue;
+      }
+      await sleep(1000);
+    }
+  }
+  
+  assistLoopActive = false;
+}
+
+function updateBadgeModeIndicator(): void {
+  const badge = document.getElementById('wordle-solver-badge');
+  if (badge) {
+    const txt = badge.textContent || '';
+    if (txt === '🧠 Solver Ready' || txt === '🤝 Assist Ready' || txt.startsWith('💡 Rec:') || txt === '💡 No Rec' || txt === '🧠 Thinking...') {
+      badge.textContent = currentMode === 'auto' ? '🧠 Solver Ready' : '🤝 Assist Ready';
+    }
+  }
+  
+  const autoItem = document.getElementById('wordle-solver-item-auto');
+  const assistItem = document.getElementById('wordle-solver-item-assist');
+  if (autoItem && assistItem) {
+    if (currentMode === 'auto') {
+      autoItem.classList.add('active');
+      assistItem.classList.remove('active');
+    } else {
+      autoItem.classList.remove('active');
+      assistItem.classList.add('active');
+    }
+  }
+}
 
 function createStatusBadge(): HTMLDivElement {
+  const wrapper = document.createElement('div');
+  wrapper.id = 'wordle-solver-wrapper';
+
   const badge = document.createElement('div');
   badge.id = 'wordle-solver-badge';
-  badge.textContent = '🧠 Solver Ready';
-  document.body.appendChild(badge);
+  badge.textContent = currentMode === 'auto' ? '🧠 Solver Ready' : '🤝 Assist Ready';
+
+  const menuBtn = document.createElement('button');
+  menuBtn.id = 'wordle-solver-menu-btn';
+  menuBtn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+      <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
+      <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+    </svg>
+  `;
+
+  const dropdown = document.createElement('div');
+  dropdown.id = 'wordle-solver-dropdown';
+  
+  const autoItem = document.createElement('div');
+  autoItem.id = 'wordle-solver-item-auto';
+  autoItem.className = `wordle-solver-dropdown-item${currentMode === 'auto' ? ' active' : ''}`;
+  autoItem.innerHTML = `
+    <span class="icon">🤖</span>
+    <span class="label">Auto Solver</span>
+    <span class="check">✓</span>
+  `;
+  autoItem.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentMode = 'auto';
+    chrome.storage.local.set({ solverMode: 'auto' });
+    updateBadgeModeIndicator();
+    dropdown.classList.remove('show');
+  });
+
+  const assistItem = document.createElement('div');
+  assistItem.id = 'wordle-solver-item-assist';
+  assistItem.className = `wordle-solver-dropdown-item${currentMode === 'assist' ? ' active' : ''}`;
+  assistItem.innerHTML = `
+    <span class="icon">🤝</span>
+    <span class="label">Assist Mode</span>
+    <span class="check">✓</span>
+  `;
+  assistItem.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentMode = 'assist';
+    chrome.storage.local.set({ solverMode: 'assist' });
+    updateBadgeModeIndicator();
+    dropdown.classList.remove('show');
+  });
+
+  dropdown.appendChild(autoItem);
+  dropdown.appendChild(assistItem);
+
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+
+  badge.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Failed to get state:', chrome.runtime.lastError);
+        return;
+      }
+      if (response?.success && response.data) {
+        const isRunning = response.data.isRunning;
+        if (isRunning) {
+          chrome.runtime.sendMessage({ type: 'STOP_SOLVER' });
+        } else {
+          if (currentMode === 'assist') {
+            updateBadge('🧠 Thinking...');
+          }
+          chrome.runtime.sendMessage({ type: 'START_SOLVER', mode: currentMode }, (startResponse) => {
+            if (chrome.runtime.lastError) {
+              console.error('Failed to start solver from badge:', chrome.runtime.lastError);
+              updateBadgeModeIndicator();
+              return;
+            }
+            if (!startResponse?.success) {
+              console.error('Failed to start solver from badge:', startResponse?.error);
+              updateBadgeModeIndicator();
+            } else if (currentMode === 'assist') {
+              chrome.runtime.sendMessage({ type: 'GET_STATE' }, (stateResponse) => {
+                if (stateResponse?.success && stateResponse.data) {
+                  const state = stateResponse.data;
+                  if (state.currentGuess) {
+                    updateBadge(`💡 Rec: ${state.currentGuess}`);
+                    startAssistLoop(state.currentRow);
+                  } else {
+                    updateBadge('💡 No Rec');
+                  }
+                }
+              });
+            }
+          });
+        }
+      }
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target as Node)) {
+      dropdown.classList.remove('show');
+    }
+  });
+
+  wrapper.appendChild(badge);
+  wrapper.appendChild(menuBtn);
+  wrapper.appendChild(dropdown);
+
+  document.body.appendChild(wrapper);
   return badge;
 }
 
@@ -252,6 +448,12 @@ function updateBadge(text: string): void {
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   const handler = async () => {
     switch (message.type) {
+      case 'START_ASSIST_LOOP': {
+        startAssistLoop(message.currentRow);
+        sendResponse({ success: true });
+        break;
+      }
+      
       case 'READ_BOARD': {
         const board = readBoardState();
         sendResponse({ success: true, data: board });
@@ -310,3 +512,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // ─── Initialization ───
 console.log('[Wordle Solver] Content script loaded on', window.location.href);
 createStatusBadge();
+
+// Initialize mode from storage
+chrome.storage.local.get(['solverMode'], (result) => {
+  if (chrome.runtime.lastError) return;
+  if (result.solverMode === 'auto' || result.solverMode === 'assist') {
+    currentMode = result.solverMode;
+    updateBadgeModeIndicator();
+  }
+});

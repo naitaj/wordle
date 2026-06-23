@@ -147,6 +147,12 @@ chrome.runtime.onMessage.addListener((message: PopupMessage, sender, sendRespons
           return;
         }
 
+        // Prevent launching duplicate active solver loops
+        if (latestState.isRunning && message.mode === 'auto') {
+          sendResponse({ success: true });
+          return;
+        }
+
         // Verify content script is loaded
         const alive = await pingContentScript(tabId);
         if (!alive) {
@@ -170,6 +176,11 @@ chrome.runtime.onMessage.addListener((message: PopupMessage, sender, sendRespons
           // Assist mode — compute recommendations
           await orchestrator.computeAssist(bridge);
           sendResponse({ success: true });
+          
+          // Send message to start the assist loop in the content script
+          chrome.tabs.sendMessage(tabId, { type: 'START_ASSIST_LOOP', currentRow: latestState.currentRow }, () => {
+            if (chrome.runtime.lastError) {}
+          });
         }
         break;
       }
@@ -177,6 +188,13 @@ chrome.runtime.onMessage.addListener((message: PopupMessage, sender, sendRespons
       case 'STOP_SOLVER': {
         if (orchestrator) {
           orchestrator.stop();
+        }
+        const tabId = currentTabId || await findWordleTab();
+        if (tabId) {
+          chrome.tabs.sendMessage(tabId, { type: 'UPDATE_BADGE', text: '🧠 Solver Ready' }, () => {
+            // Ignore error if tab is closed or content script is unloaded
+            if (chrome.runtime.lastError) {}
+          });
         }
         sendResponse({ success: true });
         break;

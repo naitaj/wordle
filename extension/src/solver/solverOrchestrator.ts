@@ -48,6 +48,32 @@ const DEFAULT_CONFIG: SolverConfig = {
   groqApiKey: '',
 };
 
+// ─── Win Probability Helper ───
+function calculateWinProbability(N: number, currentRow: number, entropy: number, isExploratory: boolean): number {
+  if (N <= 0) return 0.0;
+  if (N === 1) return 1.0;
+  
+  let attemptsLeft = 6 - currentRow;
+  if (isExploratory) {
+    attemptsLeft--; // Spent this turn on an exploratory guess
+  }
+  
+  if (attemptsLeft <= 0) return 0.0;
+  if (attemptsLeft === 1) return 1 / N;
+  
+  if (N <= attemptsLeft) return 1.0;
+  
+  const expectedGuesses = Math.log2(N) / Math.max(0.5, entropy);
+  const expectedGuessesRequired = 0.5 + expectedGuesses;
+  const margin = attemptsLeft - expectedGuessesRequired;
+  
+  // Sigmoid mapping for success rate
+  const sigmoidP = 1 / (1 + Math.exp(-1.5 * margin));
+  
+  // Make sure it is bounded by 1/N on the lower side and 0.99 on the upper side
+  return Math.min(0.99, Math.max(1 / N, sigmoidP));
+}
+
 // ─── Orchestrator ───
 
 export class SolverOrchestrator {
@@ -147,7 +173,7 @@ export class SolverOrchestrator {
         currentRow: this.currentRow,
         remainingWords: this.remainingWords,
         guessHistory: this.guessHistory,
-        statusMessage: `Resuming from row ${this.currentRow + 1}. ${this.remainingWords.length} candidates.`,
+        statusMessage: `Resuming from row ${this.currentRow + 1}. ${this.remainingWords.length} words.`,
       });
 
       // ─── Solve Loop ───
@@ -241,7 +267,7 @@ export class SolverOrchestrator {
           topCandidates: this.topCandidates,
           expectedRemaining: this.expectedRemaining,
           winProbability: this.winProbability,
-          statusMessage: `${this.remainingWords.length} candidates remaining.`,
+          statusMessage: `${this.remainingWords.length} words remaining.`,
         });
       }
     } catch (err) {
@@ -298,7 +324,7 @@ export class SolverOrchestrator {
         winProbability: this.winProbability,
         currentGuess: guess || '',
         statusMessage: guess 
-          ? `Recommended: ${guess} (${this.remainingWords.length} candidates)` 
+          ? `Recommended: ${guess} (${this.remainingWords.length} words)` 
           : 'No recommendation available.',
       });
     } catch (err) {
@@ -354,7 +380,7 @@ export class SolverOrchestrator {
       bestGuess = 'ADIEU';
       this.topCandidates = [{ word: bestGuess, entropy: 5.74, remainingCount: this.remainingWords.length }];
       this.expectedRemaining = this.remainingWords.length / Math.pow(2, 5.74);
-      this.winProbability = 1 / this.remainingWords.length;
+      this.winProbability = calculateWinProbability(this.remainingWords.length, this.currentRow, 5.74, false);
       return bestGuess;
     }
 
@@ -365,7 +391,7 @@ export class SolverOrchestrator {
     bestGuess = candidates[0].word;
     this.topCandidates = candidates.slice(0, 10);
     this.expectedRemaining = this.remainingWords.length / Math.pow(2, candidates[0].entropy);
-    this.winProbability = 1 / this.remainingWords.length;
+    this.winProbability = calculateWinProbability(this.remainingWords.length, this.currentRow, candidates[0].entropy, false);
 
     // Dynamic Exploratory Strategy
     if (!this.config.hardMode && this.remainingWords.length > 1 && this.remainingWords.length <= 150) {
@@ -375,11 +401,12 @@ export class SolverOrchestrator {
 
       if (bestFull && bestValid) {
         const marginalGain = bestFull.entropy - bestValid.entropy;
-        if (marginalGain > 0.15 && this.winProbability < 0.34) {
+        // Equivalent to 1/N < 0.34 (N >= 3)
+        if (marginalGain > 0.15 && this.remainingWords.length >= 3) {
           this.topCandidates = fullScored.slice(0, 10);
           bestGuess = bestFull.word;
           this.expectedRemaining = this.remainingWords.length / Math.pow(2, bestFull.entropy);
-          this.winProbability = 0; // Not a valid candidate
+          this.winProbability = calculateWinProbability(this.remainingWords.length, this.currentRow, bestFull.entropy, true);
           this.emit({ statusMessage: `Exploratory guess: ${bestGuess}` });
         }
       }

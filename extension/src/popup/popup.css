@@ -1,83 +1,42 @@
 @import "tailwindcss";
 
-/* Glassmorphism utility classes and animations for premium look */
-@layer utilities {
-  .glass-card {
-    background: rgba(17, 25, 40, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  
-  .glass-input {
-    background: rgba(10, 15, 30, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .glass-input:focus {
-    border-color: rgba(99, 102, 241, 0.6);
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
-    outline: none;
-  }
-  
-  .text-glow-green {
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-  }
-  
-  .text-glow-indigo {
-    text-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+@layer base {
+  html, body {
+    background-color: #F3F3F3;
+    color: #18181b;
+    width: 320px;
+    height: 600px;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
   }
 }
 
-/* Custom scrollbars */
+.font-bebas {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.font-anton {
+  font-family: 'Anton', sans-serif;
+  letter-spacing: 0px;
+}
+
+.font-oswald {
+  font-family: 'Oswald', sans-serif;
+}
+
+.font-mono-retro {
+  font-family: 'Space Mono', monospace;
+}
+
+/* Hide scrollbars globally */
 ::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  display: none;
+  width: 0px;
+  height: 0px;
 }
 
-/* Custom animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-    border-color: rgba(16, 185, 129, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
-    border-color: rgba(16, 185, 129, 0.5);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite ease-in-out;
-}
-
-@keyframes progress-shine {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-}
-
-.progress-bar-shine {
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  background-size: 200px 100%;
-  background-repeat: no-repeat;
-  animation: progress-shine 2.5s infinite linear;
+* {
+  scrollbar-width: none;
 }

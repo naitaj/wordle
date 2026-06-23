@@ -111,276 +111,144 @@ export function Popup() {
     }
   };
 
-  const getPhaseStyles = (phase: string) => {
+  // Helper for status text and colors
+  const getStatusDisplay = () => {
+    const phase = solverState.phase || 'idle';
     switch (phase) {
-      case 'idle':
-        return { bg: 'bg-slate-700/50', border: 'border-slate-600/30', text: 'text-slate-400', label: 'Idle' };
-      case 'thinking':
-        return { bg: 'bg-indigo-950/50 border-indigo-500/30', border: 'border-indigo-500/40 animate-pulse', text: 'text-indigo-400', label: 'Thinking' };
-      case 'typing':
-        return { bg: 'bg-amber-950/50 border-amber-500/30', border: 'border-amber-500/40 animate-bounce', text: 'text-amber-400', label: 'Typing' };
-      case 'evaluating':
-        return { bg: 'bg-cyan-950/50 border-cyan-500/30', border: 'border-cyan-500/40 animate-pulse', text: 'text-cyan-400', label: 'Revealing' };
       case 'won':
-        return { bg: 'bg-emerald-950/50 border-emerald-500/30', border: 'border-emerald-500/50 animate-pulse-glow', text: 'text-emerald-400', label: 'Won 🎉' };
+        return { text: 'WON', color: 'text-emerald-600', icon: true };
       case 'lost':
-        return { bg: 'bg-rose-950/50 border-rose-500/30', border: 'border-rose-500/50', text: 'text-rose-400', label: 'Lost 😢' };
+        return { text: 'FAIL', color: 'text-rose-600', icon: false };
+      case 'thinking':
+        return { text: 'THINKING', color: 'text-black', icon: false };
+      case 'typing':
+        return { text: 'TYPING', color: 'text-black', icon: false };
+      case 'evaluating':
+        return { text: 'REVEALING', color: 'text-black', icon: false };
+      case 'idle':
       default:
-        return { bg: 'bg-slate-700/50', border: 'border-slate-600/30', text: 'text-slate-400', label: phase };
+        return { text: 'IDLE', color: 'text-zinc-500', icon: false };
     }
   };
 
-  const currentPhase = solverState.phase || 'idle';
-  const phaseStyles = getPhaseStyles(currentPhase);
+  const status = getStatusDisplay();
   const candidates: ScoredWord[] = solverState.topCandidates || [];
   const remainingCount = solverState.remainingWords?.length || 0;
 
-  return (
-    <div className="flex flex-col min-h-[580px] w-[400px] bg-[#0b0f19] border border-slate-800/40 font-sans shadow-2xl relative select-none">
-      
-      {/* ─── Glowing Background Accents ─── */}
-      <div className="absolute top-0 left-1/4 w-40 h-40 bg-indigo-500/10 rounded-full blur-[60px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-32 h-32 bg-emerald-500/5 rounded-full blur-[50px] pointer-events-none" />
+  // Reconstruct completed/active rows count
+  const attemptsCount = solverState.phase === 'won'
+    ? (solverState.currentRow || 0)
+    : (solverState.currentRow || 0);
 
-      {/* ─── Header ─── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-800/60 bg-[#0c1220]/75 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <span className="text-white font-black text-sm tracking-wider font-outfit">W</span>
-          </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-wide uppercase font-outfit bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-              Wordle Entropy
-            </h1>
-            <p className="text-[10px] text-slate-500 font-medium tracking-wider">AUTONOMOUS SOLVER</p>
-          </div>
-        </div>
+  const filledRowsCount = solverState.phase === 'won'
+    ? (solverState.currentRow || 0)
+    : (isRunning ? (solverState.currentRow || 0) : 0);
+
+  // Helper to color candidate letter boxes
+  const getLetterColorClass = (letter: string) => {
+    if (!letter || !solverState.keyboardState) return 'bg-[#E4E4E7] border-zinc-300';
+    const state = solverState.keyboardState[letter.toUpperCase()];
+    switch (state) {
+      case 'correct':
+        return 'bg-emerald-600 border-emerald-700';
+      case 'present':
+        return 'bg-amber-500 border-amber-600';
+      case 'absent':
+        return 'bg-zinc-400 border-zinc-500';
+      case 'empty':
+      default:
+        return 'bg-[#E4E4E7] border-zinc-300';
+    }
+  };
+
+  // Render settings page if settings tab active
+  if (activeTab === 'settings') {
+    return (
+      <div className="flex flex-col h-[600px] w-[320px] bg-[#F3F3F3] text-black font-sans p-0 select-none box-border border-2 border-black overflow-hidden">
         
-        {/* Navigation Tabs */}
-        <div className="flex bg-slate-800/40 p-0.5 rounded-lg border border-slate-700/20">
-          <button
-            onClick={() => setActiveTab('play')}
-            className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-250 cursor-pointer ${
-              activeTab === 'play'
-                ? 'bg-slate-700 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Play
-          </button>
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-250 cursor-pointer ${
-              activeTab === 'settings'
-                ? 'bg-slate-700 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Settings
-          </button>
-        </div>
-      </header>
-
-      {/* ─── Main Content Area ─── */}
-      <main className="flex-1 p-5 flex flex-col gap-4 overflow-y-auto">
-        {error && (
-          <div className="p-3.5 bg-rose-950/40 border border-rose-500/20 text-rose-300 text-xs rounded-xl flex flex-col gap-1 shadow-lg shadow-rose-950/10 animate-shake">
-            <span className="font-bold uppercase tracking-wider text-[9px] text-rose-400">Error Encountered</span>
-            <span>{error}</span>
+        {/* Settings Header */}
+        <header className="bg-black text-white px-5 py-4 flex items-center justify-between border-b-2 border-black">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-black uppercase tracking-wider font-bebas text-white">SETTINGS</h1>
+            <div className="text-zinc-400 font-black text-lg tracking-[0.05em] select-none font-bebas">///</div>
           </div>
-        )}
+          <button 
+            onClick={() => setActiveTab('play')}
+            className="text-white hover:text-zinc-300 font-bold cursor-pointer outline-none bg-transparent border-none p-0 flex items-center justify-center"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </header>
 
-        {activeTab === 'play' ? (
-          <>
-            {/* Mode & Action Controls */}
-            <div className="glass-card p-4 rounded-2xl flex flex-col gap-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => !isRunning && setMode('auto')}
-                  disabled={isRunning}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer border ${
-                    mode === 'auto'
-                      ? 'bg-indigo-600/15 border-indigo-500/40 text-indigo-200'
-                      : 'bg-transparent border-slate-800 text-slate-400 hover:text-slate-300 hover:border-slate-700/50'
-                  } disabled:opacity-50`}
-                >
-                  Auto Solve
-                </button>
-                <button
-                  onClick={() => !isRunning && setMode('assist')}
-                  disabled={isRunning}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer border ${
-                    mode === 'assist'
-                      ? 'bg-indigo-600/15 border-indigo-500/40 text-indigo-200'
-                      : 'bg-transparent border-slate-800 text-slate-400 hover:text-slate-300 hover:border-slate-700/50'
-                  } disabled:opacity-50`}
-                >
-                  Assist Mode
-                </button>
-              </div>
-
-              {/* Start / Stop Button */}
-              {isRunning ? (
-                <button
-                  onClick={handleStop}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-orange-500 hover:from-rose-500 hover:to-orange-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-950/20 transition-all duration-200 cursor-pointer transform active:scale-[0.98]"
-                >
-                  Stop Solver
-                </button>
-              ) : (
-                <button
-                  onClick={handleStart}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-indigo-950/30 transition-all duration-200 cursor-pointer transform active:scale-[0.98]"
-                >
-                  Start Solving
-                </button>
-              )}
-            </div>
-
-            {/* Status & Stats Dashboard */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Current Status */}
-              <div className={`col-span-2 glass-card p-3 rounded-xl flex items-center justify-between border ${phaseStyles.border} transition-all duration-300`}>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">Current State</span>
-                  <span className="text-xs font-semibold text-slate-200">{solverState.statusMessage}</span>
-                </div>
-                <div className={`px-2.5 py-1 text-[10px] font-bold rounded-lg ${phaseStyles.bg} ${phaseStyles.text} uppercase border border-current/10`}>
-                  {phaseStyles.label}
-                </div>
-              </div>
-
-              {/* Active Guess / Row */}
-              <div className="glass-card p-3 rounded-xl flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">Row / Attempt</span>
-                <span className="text-sm font-bold text-slate-200 font-outfit">
-                  {isRunning ? `${(solverState.currentRow || 0) + 1} / 6` : '—'}
-                </span>
-              </div>
-
-              {/* Remaining Words */}
-              <div className="glass-card p-3 rounded-xl flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">Candidates Left</span>
-                <span className="text-sm font-bold text-slate-200 font-outfit">
-                  {remainingCount.toLocaleString()}
-                </span>
-              </div>
-
-              {/* Expected Remaining */}
-              <div className="glass-card p-3 rounded-xl flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">Exp. Remaining</span>
-                <span className="text-sm font-bold text-slate-200 font-outfit">
-                  {solverState.expectedRemaining ? Number(solverState.expectedRemaining).toFixed(2) : '0.00'}
-                </span>
-              </div>
-
-              {/* Win Probability */}
-              <div className="glass-card p-3 rounded-xl flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">Win Probability</span>
-                <span className="text-sm font-bold text-emerald-400 font-outfit text-glow-green">
-                  {solverState.winProbability ? `${Math.round(solverState.winProbability * 100)}%` : '0%'}
-                </span>
+        {/* Settings Content */}
+        <div className="flex-1 p-5 flex flex-col overflow-y-auto">
+          <div className="flex flex-col gap-6">
+            
+            {/* Hard Mode Setting */}
+            <div className="flex flex-col gap-2.5 items-start">
+              <h2 className="text-lg font-black uppercase tracking-wide font-bebas text-black leading-none">HARD MODE</h2>
+              <p className="text-[11px] text-zinc-800 leading-normal max-w-[280px]">
+                Revealed hints must be used in subsequent guesses.
+              </p>
+              
+              {/* Tactile Switch */}
+              <div 
+                onClick={() => updateSetting('hardMode', !config.hardMode)}
+                className="w-24 h-8 border-2 border-black flex cursor-pointer select-none font-bebas text-[11px] mt-1"
+              >
+                {config.hardMode ? (
+                  <>
+                    <div className="w-1/2 bg-white text-black flex items-center justify-center font-bold border-r border-black">ON</div>
+                    <div className="w-1/2 bg-black"></div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-1/2 bg-white text-black flex items-center justify-center font-bold border-r border-black">OFF</div>
+                    <div className="w-1/2 bg-white"></div>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Candidates Panel */}
-            <div className="glass-card p-4 rounded-2xl flex-1 flex flex-col gap-3 min-h-[170px]">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Top Candidates</span>
-                <span className="text-[9px] text-slate-500 font-medium">{remainingCount} matches</span>
-              </div>
+            <hr className="border-black border-t-2 my-1" />
 
-              {candidates.length > 0 ? (
-                <div className="flex flex-col gap-2 overflow-y-auto flex-1 max-h-[150px] pr-1">
-                  {candidates.slice(0, 5).map((cand, idx) => {
-                    const maxEntropy = candidates[0]?.entropy || 1;
-                    const widthPercent = maxEntropy > 0 ? (cand.entropy / maxEntropy) * 100 : 0;
-                    
-                    return (
-                      <div key={cand.word} className="flex flex-col gap-1 p-2 rounded-lg bg-slate-900/40 border border-slate-800/30">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold text-slate-500">#{idx + 1}</span>
-                            <span className={`text-xs font-bold tracking-widest ${idx === 0 ? 'text-emerald-400 font-outfit text-glow-green' : 'text-slate-300'}`}>
-                              {cand.word}
-                            </span>
-                          </div>
-                          <span className="text-[10px] font-mono text-slate-400">{cand.entropy.toFixed(3)} bits</span>
-                        </div>
-                        {/* Progress Bar */}
-                        <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full progress-bar-shine ${
-                              idx === 0
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                                : 'bg-gradient-to-r from-slate-700 to-slate-500'
-                            }`}
-                            style={{ width: `${widthPercent}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center gap-1.5 text-center text-slate-600">
-                  <span className="text-xl">📊</span>
-                  <p className="text-[11px] font-medium max-w-[200px]">
-                    {isRunning ? 'Analyzing game state...' : 'No candidate data. Press start to run solver.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          /* ─── Settings Tab ─── */
-          <div className="glass-card p-4 rounded-2xl flex flex-col gap-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 pb-2">
-              Solver Settings
-            </h2>
-
-            {/* Hard Mode Toggle */}
-            <div className="flex items-center justify-between py-1 border-b border-slate-800/30">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-slate-200">Hard Mode</span>
-                <span className="text-[9px] text-slate-500">Any revealed hints must be used in subsequent guesses</span>
+            {/* Groq LLM Fallback Setting */}
+            <div className="flex flex-col gap-2.5 items-start">
+              <h2 className="text-lg font-black uppercase tracking-wide font-bebas text-black leading-none">GROQ LLM FALLBACK</h2>
+              <p className="text-[11px] text-zinc-800 leading-normal max-w-[280px]">
+                Enable Llama fallback if entropy engine runs out of words.
+              </p>
+              
+              {/* Tactile Switch */}
+              <div 
+                onClick={() => updateSetting('llmFallbackEnabled', !config.llmFallbackEnabled)}
+                className="w-24 h-8 border-2 border-black flex cursor-pointer select-none font-bebas text-[11px] mt-1"
+              >
+                {config.llmFallbackEnabled ? (
+                  <>
+                    <div className="w-1/2 bg-white text-black flex items-center justify-center font-bold border-r border-black">ON</div>
+                    <div className="w-1/2 bg-black"></div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-1/2 bg-white text-black flex items-center justify-center font-bold border-r border-black">OFF</div>
+                    <div className="w-1/2 bg-white"></div>
+                  </>
+                )}
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.hardMode}
-                  onChange={(e) => updateSetting('hardMode', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-slate-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-indigo-500/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white peer-checked:after:border-transparent"></div>
-              </label>
             </div>
 
-            {/* LLM Fallback Toggle */}
-            <div className="flex items-center justify-between py-1 border-b border-slate-800/30">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-slate-200">Groq LLM Fallback</span>
-                <span className="text-[9px] text-slate-500">Enable Llama fallback if entropy engine runs out of words</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.llmFallbackEnabled}
-                  onChange={(e) => updateSetting('llmFallbackEnabled', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-slate-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-indigo-500/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white peer-checked:after:border-transparent"></div>
-              </label>
-            </div>
-
-            {/* API Key Input (only visible if fallback is enabled) */}
+            {/* Groq API Key Input */}
             {config.llmFallbackEnabled && (
-              <div className="flex flex-col gap-2 p-3 bg-slate-950/40 rounded-xl border border-indigo-500/10">
+              <div className="flex flex-col gap-2 p-3 bg-zinc-50 border-2 border-black box-border mt-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Groq API Key</span>
+                  <span className="text-[9px] font-bold text-black uppercase tracking-wide">Groq API Key</span>
                   <button
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="text-[9px] text-indigo-400 font-semibold cursor-pointer hover:underline"
+                    className="text-[9px] text-zinc-500 hover:text-black font-bold uppercase cursor-pointer"
                   >
                     {showApiKey ? 'Hide' : 'Show'}
                   </button>
@@ -390,43 +258,326 @@ export function Popup() {
                   placeholder="gsk_..."
                   value={config.groqApiKey}
                   onChange={(e) => updateSetting('groqApiKey', e.target.value)}
-                  className="glass-input w-full px-3 py-2 text-xs rounded-lg text-slate-200 font-mono"
+                  className="w-full px-3 py-1.5 text-xs border-2 border-black rounded-md text-black font-mono focus:outline-none bg-white box-border"
                 />
-                <span className="text-[8px] text-slate-600">
-                  Required to call Llama model fallback. Key is stored locally in chrome.storage.
+                <span className="text-[8px] text-zinc-500 leading-normal">
+                  Key is stored locally in chrome.storage.
                 </span>
               </div>
             )}
 
-            {/* Typing Delay Slider */}
-            <div className="flex flex-col gap-2 py-1">
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-bold text-slate-200">Keystroke Speed</span>
-                  <span className="text-[9px] text-slate-500">Delay between typed letters (human-like feeling)</span>
-                </div>
-                <span className="text-xs font-bold text-indigo-400 font-mono">{config.typingDelay}ms</span>
-              </div>
-              <input
-                type="range"
-                min="50"
-                max="500"
-                step="10"
-                value={config.typingDelay}
-                onChange={(e) => updateSetting('typingDelay', parseInt(e.target.value))}
-                className="w-full accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer h-1"
-              />
+            <hr className="border-black border-t-2 my-1" />
+
+            {/* Keystroke Speed Header-Only Display */}
+            <div className="flex flex-col gap-1 py-1">
+              <h2 className="text-lg font-black uppercase tracking-wide font-bebas text-black leading-none">
+                KEYSTROKE SPEED 500 m/s
+              </h2>
             </div>
           </div>
-        )}
-      </main>
+
+          {/* Footer Close button */}
+          <div className="mt-auto pt-6 flex justify-end">
+            <button
+              onClick={() => setActiveTab('play')}
+              className="bg-black text-white hover:bg-zinc-800 font-bebas text-lg px-8 py-2 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer outline-none"
+            >
+              CLOSE
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-[600px] w-[320px] bg-[#F3F3F3] text-black font-sans p-4 select-none box-border border-2 border-black justify-between overflow-hidden">
       
-      {/* Footer / Copyright */}
-      <footer className="px-5 py-3 border-t border-slate-900 bg-slate-950/40 text-center">
-        <p className="text-[9px] text-slate-600 font-medium">
-          Licensed under MIT. Open source on <a href="https://github.com/naitaj/wordle" target="_blank" rel="noreferrer" className="text-slate-500 hover:text-slate-400 underline">GitHub</a>.
-        </p>
-      </footer>
+      {/* ─── Header ─── */}
+      <header className="flex items-center justify-between pb-3 border-b-2 border-black bg-transparent">
+        <div className="flex items-center gap-3">
+          {/* Taller / More Elongated Logo */}
+          <div className="h-20 w-12 bg-black flex items-center justify-center select-none shrink-0">
+            <span className="text-white font-oswald font-bold text-5xl tracking-normal pt-1 inline-block">W</span>
+          </div>
+          <div className="flex flex-col justify-center select-none">
+            <h1 className="text-[30px] font-oswald font-bold text-black uppercase leading-[0.9] tracking-[0.04em]">
+              WORDLE
+            </h1>
+            <h1 className="text-[30px] font-oswald font-bold text-black uppercase leading-[0.9] tracking-[0.04em]">
+              ENTROPY
+            </h1>
+            <p 
+              className="text-[11px] text-[#222222] font-bold uppercase mt-1"
+              style={{
+                fontFamily: "'Roboto Condensed', 'DIN Condensed', 'Bahnschrift Condensed', sans-serif",
+                letterSpacing: '0.35em'
+              }}
+            >
+              AUTONOMOUS SOLVER
+            </p>
+          </div>
+        </div>
+
+        {/* Settings button */}
+        <button
+          onClick={() => setActiveTab('settings')}
+          className="w-9 h-9 border-2 border-black rounded-lg bg-white flex items-center justify-center hover:bg-zinc-100 active:bg-zinc-200 transition-all cursor-pointer outline-none"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-black">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </header>
+
+      {/* ─── Main Content Area ─── */}
+      <main className="flex-1 py-3 flex flex-col gap-3 overflow-y-auto justify-between">
+        <div className="flex flex-col gap-3">
+          {error && (
+            <div className="p-3 bg-rose-50 border-2 border-rose-600 text-rose-800 text-xs font-bold flex flex-col gap-0.5 animate-shake">
+              <span className="uppercase tracking-wider text-[9px] text-rose-600">Error Encountered</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Mode Tabs */}
+          <div className="flex border-2 border-black rounded-lg overflow-hidden bg-white w-full">
+            <button
+              onClick={() => !isRunning && setMode('auto')}
+              disabled={isRunning}
+              className={`flex-1 py-1.5 text-center font-bebas text-sm border-r border-black cursor-pointer transition-all uppercase tracking-wide flex items-center justify-center gap-1.5 ${
+                mode === 'auto'
+                  ? 'bg-black text-white'
+                  : 'bg-white text-black hover:bg-zinc-50'
+              } disabled:opacity-50`}
+            >
+              ✦ Auto Solve
+            </button>
+            <button
+              onClick={() => !isRunning && setMode('assist')}
+              disabled={isRunning}
+              className={`flex-1 py-1.5 text-center font-bebas text-sm cursor-pointer transition-all uppercase tracking-wide ${
+                mode === 'assist'
+                  ? 'bg-black text-white'
+                  : 'bg-white text-black hover:bg-zinc-50'
+              } disabled:opacity-50`}
+            >
+              Assist Mode
+            </button>
+          </div>
+
+          {/* Start / Stop Button */}
+          {isRunning ? (
+            <button
+              onClick={handleStop}
+              className="w-full h-14 bg-black text-white font-bebas text-[28px] tracking-wide flex items-center justify-between px-5 border border-black cursor-pointer rounded-none hover:bg-zinc-900 transition-colors outline-none"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white shrink-0">
+                <rect x="4" y="4" width="16" height="16" rx="1"></rect>
+              </svg>
+              <span className="font-bold pt-0.5">STOP SOLVING</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white shrink-0">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={handleStart}
+              className="w-full h-14 bg-black text-white font-bebas text-[28px] tracking-wide flex items-center justify-between px-5 border border-black cursor-pointer rounded-none hover:bg-zinc-900 transition-colors outline-none"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white shrink-0">
+                <polygon points="6 3 20 12 6 21 6 3"></polygon>
+              </svg>
+              <span className="font-bold pt-0.5">START SOLVING</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white shrink-0">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          )}
+
+          {/* Solved attempts & status - Divider centered and status aligned extreme right */}
+          <div className="border-2 border-black p-3 bg-white flex items-center justify-between box-border h-16">
+            {/* Left Column: Solved In */}
+            <div className="w-[calc(50%-1px)] flex flex-col items-start justify-center">
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider">Solved In</span>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-3xl font-black font-bebas leading-none text-black">
+                  {attemptsCount || '—'}
+                </span>
+                <span className="text-[8px] font-bold text-black uppercase tracking-wider">Attempts</span>
+              </div>
+            </div>
+            
+            {/* Central Divider */}
+            <div className="w-[2px] bg-black self-stretch"></div>
+            
+            {/* Right Column: Status (aligned extreme right) */}
+            <div className="w-[calc(50%-1px)] flex flex-col items-end justify-center font-bebas">
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider font-sans">Status</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={`text-3xl font-black leading-none uppercase ${status.color}`}>
+                  {status.text}
+                </span>
+                {status.icon && (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600">
+                    <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/>
+                    <path d="M5 20h14"/>
+                  </svg>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Grid Metrics - Candidates renamed to Words */}
+          <div className="grid grid-cols-4 border-2 border-black bg-white divide-x-2 divide-black box-border">
+            {/* Box 1: Row / Attempt */}
+            <div className="p-2 flex flex-col items-center justify-between min-h-[64px]">
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-center leading-tight">Row / Attempt</span>
+              <span className="text-lg font-black font-bebas text-black leading-none my-1">
+                {isRunning ? `${(solverState.currentRow || 0) + 1} / 6` : '—'}
+              </span>
+              <div className="flex gap-[2px]">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-2 border border-black ${
+                      i < filledRowsCount ? 'bg-black' : 'bg-white'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Box 2: Words Left */}
+            <div className="p-2 flex flex-col items-center justify-between min-h-[64px]">
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-center leading-tight">Words Left</span>
+              <span className="text-lg font-black font-bebas text-black my-1">
+                {remainingCount.toLocaleString()}
+              </span>
+              <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider leading-none">Words</span>
+            </div>
+
+            {/* Box 3: Exp. Remaining */}
+            <div className="p-2 flex flex-col items-center justify-between min-h-[64px]">
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-center leading-tight">Exp. Remaining</span>
+              <span className="text-lg font-black font-bebas text-black my-1 font-mono-retro">
+                {solverState.expectedRemaining ? Number(solverState.expectedRemaining).toFixed(2) : '0.00'}
+              </span>
+              <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider leading-none">Bits</span>
+            </div>
+
+            {/* Box 4: Win Probability */}
+            <div className="p-2 flex flex-col items-center justify-between min-h-[64px]">
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-center leading-tight">Win Probability</span>
+              <span className="text-lg font-black font-bebas text-emerald-600 my-1">
+                {solverState.winProbability ? `${Math.round(solverState.winProbability * 100)}%` : '0%'}
+              </span>
+              <div className="w-full h-1.5 bg-white border border-black overflow-hidden box-border">
+                <div
+                  className="h-full bg-emerald-600 transition-all duration-300"
+                  style={{ width: `${solverState.winProbability ? Math.round(solverState.winProbability * 100) : 0}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Candidates Panel - Renamed Top Candidates to Top Words */}
+        <div className="border-2 border-black bg-white flex flex-col flex-1 min-h-[170px] box-border overflow-hidden">
+          <div className="border-b-2 border-black px-3 py-2 flex justify-between items-center bg-zinc-50 select-none">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-black">Top Words</span>
+            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{remainingCount} Matches &gt;</span>
+          </div>
+
+          {solverState.phase === 'won' ? (
+            /* Showcase guess history after winning */
+            <div className="flex flex-col divide-y divide-zinc-200 overflow-y-auto flex-1 max-h-[160px]">
+              {(solverState.guessHistory || []).map((guessRecord, idx) => (
+                <div key={idx} className="flex items-center justify-between pr-3 h-[40px] hover:bg-zinc-50 transition-all box-border">
+                  <div className="flex items-center self-stretch">
+                    <div className="w-8 bg-black text-white flex items-center justify-center font-bold text-xs self-stretch font-bebas">
+                      {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <span className="text-lg font-black tracking-widest text-black pl-3 font-bebas">
+                      {guessRecord.word}
+                    </span>
+                  </div>
+                  
+                  {/* Letters status squares adjacent to words (between words and chevron) */}
+                  <div className="flex gap-[3px] ml-auto mr-4 items-center">
+                    {guessRecord.word.split('').map((_, i) => {
+                      const res = guessRecord.result[i];
+                      let colorClass = 'bg-[#E4E4E7] border-zinc-300';
+                      if (res === 'correct') colorClass = 'bg-emerald-600 border-emerald-700 text-white';
+                      else if (res === 'present') colorClass = 'bg-amber-500 border-amber-600 text-white';
+                      else if (res === 'absent') colorClass = 'bg-zinc-400 border-zinc-500 text-white';
+                      
+                      return (
+                        <div
+                          key={i}
+                          className={`w-3.5 h-3.5 border border-black/40 rounded-[2px] ${colorClass}`}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-zinc-400 font-bold text-xs select-none">&gt;</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : candidates.length > 0 ? (
+            /* Active candidates list */
+            <div className="flex flex-col divide-y divide-zinc-200 overflow-y-auto flex-1 max-h-[160px]">
+              {candidates.slice(0, 5).map((cand, idx) => (
+                <div key={cand.word} className="flex items-center justify-between pr-3 h-[40px] hover:bg-zinc-50 transition-all box-border">
+                  <div className="flex items-center self-stretch">
+                    <div className="w-8 bg-black text-white flex items-center justify-center font-bold text-xs self-stretch font-bebas">
+                      {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <span className="text-lg font-black tracking-widest text-black pl-3 font-bebas">
+                      {cand.word}
+                    </span>
+                  </div>
+                  
+                  {/* Character pattern indicator: 5 square boxes colored by keyboard state */}
+                  <div className="flex gap-[3px] ml-auto mr-4 items-center">
+                    {cand.word.split('').map((letter, i) => (
+                      <div
+                        key={i}
+                        className={`w-3.5 h-3.5 border border-black/40 rounded-[2px] transition-colors ${getLetterColorClass(letter)}`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="text-xs font-black font-bebas text-black leading-none">
+                        {cand.entropy.toFixed(3)}
+                      </div>
+                      <div className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider leading-none">
+                        Bits
+                      </div>
+                    </div>
+                    <span className="text-zinc-400 font-bold text-xs select-none">&gt;</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center gap-1.5 text-center p-4">
+              <span className="text-2xl text-black">📊</span>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider max-w-[220px] leading-relaxed">
+                {isRunning ? 'Analyzing game state...' : 'No word data. Press start solver.'}
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
