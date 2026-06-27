@@ -164,7 +164,7 @@ export function Popup() {
   // Render settings page if settings tab active
   if (activeTab === 'settings') {
     return (
-      <div className="flex flex-col h-[600px] w-[320px] bg-[#F3F3F3] text-black font-sans p-0 select-none box-border border-2 border-black overflow-hidden">
+      <div className="flex flex-col h-[600px] w-[260px] bg-[#F3F3F3] text-black font-sans p-0 select-none box-border border-2 border-black overflow-hidden">
         
         {/* Settings Header */}
         <header className="bg-black text-white px-5 py-4 flex items-center justify-between border-b-2 border-black">
@@ -291,29 +291,29 @@ export function Popup() {
   }
 
   return (
-    <div className="flex flex-col h-[600px] w-[320px] bg-[#F3F3F3] text-black font-sans p-4 select-none box-border border-2 border-black justify-between overflow-hidden">
+    <div className="flex flex-col h-[600px] w-[260px] bg-[#F3F3F3] text-black font-sans p-3 select-none box-border border-2 border-black justify-between overflow-hidden">
       
       {/* ─── Header ─── */}
       <header className="flex items-center justify-between pb-3 border-b-2 border-black bg-transparent">
         <div className="flex items-center gap-3">
           {/* Taller / More Elongated Logo */}
-          <div className="h-[88px] w-[52px] bg-black flex items-center justify-center select-none shrink-0">
-            <span className="text-white text-[56px] pt-2 inline-block" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400, letterSpacing: '0' }}>W</span>
+          <div className="h-[72px] w-[42px] bg-black flex items-center justify-center select-none shrink-0">
+            <span className="text-white text-[44px] pt-1 inline-block" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400, letterSpacing: '0' }}>W</span>
           </div>
-          <div className="flex flex-col justify-center select-none ml-2 h-[88px]">
+          <div className="flex flex-col justify-center select-none ml-2 h-[72px]">
             <div className="flex flex-col justify-center">
-              <h1 className="text-[36px] text-black uppercase leading-[0.9] tracking-[0.05em]" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400 }}>
+              <h1 className="text-[28px] text-black uppercase leading-[0.9] tracking-[0.05em]" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400 }}>
                 WORDLE
               </h1>
-              <h1 className="text-[36px] text-black uppercase leading-[0.9] tracking-[0.05em] mt-1" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400 }}>
+              <h1 className="text-[28px] text-black uppercase leading-[0.9] tracking-[0.05em] mt-0.5" style={{ fontFamily: '"Anton", sans-serif', fontWeight: 400 }}>
                 ENTROPY
               </h1>
             </div>
             <p 
-              className="text-[16px] text-[#222222] font-medium uppercase mt-2 leading-none"
+              className="text-[10px] text-[#222222] font-medium uppercase mt-1 leading-none"
               style={{
                 fontFamily: "'DIN Condensed', 'Bahnschrift Condensed', 'Roboto Condensed', sans-serif",
-                letterSpacing: '0.35em'
+                letterSpacing: '0.22em'
               }}
             >
               AUTONOMOUS SOLVER
@@ -441,11 +441,11 @@ export function Popup() {
               <span className="text-lg font-black font-bebas text-black leading-none my-1">
                 {isRunning ? `${(solverState.currentRow || 0) + 1} / 6` : '—'}
               </span>
-              <div className="flex gap-[2px]">
+              <div className="flex gap-[1.5px]">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
-                    className={`w-2 h-2 border border-black ${
+                    className={`w-1.5 h-1.5 border border-black ${
                       i < filledRowsCount ? 'bg-black' : 'bg-white'
                     }`}
                   />
