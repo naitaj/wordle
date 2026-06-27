@@ -1,7 +1,7 @@
 #wordle-solver-wrapper {
   position: fixed;
   top: 16px;
-  right: 4px;
+  right: 0px;
   z-index: 99999;
   display: flex;
   align-items: center;
