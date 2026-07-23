@@ -1,40 +1,56 @@
 # Wordle Entropy Solver
 
-This is a browser extension that plays Wordle for you or helps you play better by suggesting words. It works on the official New York Times Wordle page and the wordle.name clone. The solver calculates which guesses will reveal the most information and tries to solve the game in the fewest moves possible.
+Wordle Entropy Solver is a browser extension and companion website that helps users solve Wordle puzzles using information theory. The extension calculates Shannon entropy to find the guess that eliminates the most remaining words. It works on the official New York Times Wordle page and the wordle.name clone.
 
-## What it does
+## Overview
 
-The extension runs in two modes. 
+The extension runs in two modes:
 
-Auto Solve reads the board and chooses the best word and types it out and presses enter. It repeats this until the game is won or lost.
+* **Auto Solve:** Reads the game board, selects the optimal guess, types it in, and submits it. It repeats this until the game ends.
+* **Assist Mode:** Suggests the highest-information words on the side, updating recommendations in real time as you enter guesses manually.
 
-Assist Mode sits on the side and suggests the best word to play next. It updates its recommendations automatically as you enter guesses on the page.
+The companion website acts as the central hub for the project, allowing users to learn how the extension works, download it, and verify that it is correctly installed.
 
-To prevent the extension popup from covering the Wordle board or keyboard the content script automatically shifts the webpage layout to the left. This creates a clear space on the right of the screen where the solver fits perfectly.
+## Extension Features
 
-## How it calculates guesses
+* **Entropy Calculations:** Evaluates guesses by how evenly they partition the remaining possible answers.
+* **Exploratory Guesses:** Automatically plays search words when appropriate to eliminate multiple letters quickly.
+* **LLM Fallback:** Integrates with the Groq API using LLaMA 3 to handle custom word scenarios where the solver is left with zero candidate words.
+* **Industrial Design:** Compact 320x600px sidebar user interface matching the NYT branding and Braun industrial aesthetics.
 
-The core algorithm scores every available word. The score represents the expected amount of information a guess will reveal by looking at how it splits the remaining possible answers into groups. 
+## Browser Compatibility
 
-The solver starts with an optimal opening word to gather maximum initial data. For subsequent guesses it filters the dictionary based on the green yellow and gray tile feedback. If the candidate pool is large it may play an exploratory word to eliminate multiple letters at once. If the pool of words drops to zero due to custom words it falls back to a LLaMA 3 model via the Groq API to suggest a best effort guess.
+The extension is designed for Chromium-based desktop browsers:
 
-The win probability indicator calculates your real chance of winning the game. Instead of a simple fraction it uses the remaining attempts and the entropy of the best guess to estimate how many guesses are needed to solve the remaining words.
+* Google Chrome
+* Microsoft Edge
+* Brave Browser
 
-## Interface design
+It does not support mobile browsers directly, which is why the companion website provides a verification check to confirm successful desktop installation.
 
-The interface is built with a high contrast modernist layout inspired by industrial signage. It features a compact width of 320 pixels and height of 600 pixels to fit comfortably on the screen. It has global styling that hides scrollbars for a cleaner panel layout. It uses clear typography with the Anton and DIN Condensed fonts. It features a centered attempts divider with status indicators aligned to the far right. It includes flat black action buttons with simple line icons.
+## Website Structure
 
-## Setting it up
+The project includes a multi-page React application at the root directory:
 
-To build and run the extension locally.
+* **Home:** Details the solver mechanics with an animated walkthrough of the solving process.
+* **Download:** Direct link to the extension build files.
+* **Install Guide:** A step-by-step walkthrough covering dependency setup and loading unpacked extension files.
+* **Check Installation:** Uses Chrome runtime messaging to verify if the extension has been loaded and is active in the user's browser.
+* **FAQ:** Explanations of entropy, browser limitations, and offline privacy details.
 
-1. Clone the repository.
+## Setting Up and Running the Project
+
+### Installation Instructions
+
+To install and run the extension locally:
+
+1. Clone this repository.
    ```bash
    git clone https://github.com/naitaj/wordle.git
    cd wordle
    ```
 
-2. Install the project dependencies.
+2. Install the package dependencies.
    ```bash
    npm install
    ```
@@ -43,10 +59,32 @@ To build and run the extension locally.
    ```bash
    node extension/build.js
    ```
-   This compiles the popup and background worker and content scripts outputting them to the extension/dist folder.
+   This generates the compiled content scripts and popup inside the `extension/dist` folder.
 
-4. Load it in Chrome.
-   Open chrome://extensions/ in your browser. Turn on Developer Mode in the top right. Click Load Unpacked in the top left. Select the extension/dist directory.
+4. Load the unpacked extension in your browser:
+   * Open `chrome://extensions/` in Chrome or the equivalent in Edge or Brave.
+   * Enable "Developer Mode" in the top-right corner.
+   * Click "Load unpacked" in the top-left corner.
+   * Select the `extension/dist` directory.
 
-5. Optional Groq configuration.
-   If you want to use the LLaMA fallback open the extension settings and paste your Groq API key.
+### Development and Website Instructions
+
+To run the companion website locally for development:
+
+```bash
+npm run dev
+```
+
+This starts the Vite local server (usually at `http://localhost:5173` or `http://localhost:5174`).
+
+To build the website for production:
+
+```bash
+npm run build
+```
+
+This compiles the website assets into the root `dist` folder.
+
+## License
+
+This project is licensed under the MIT License.
