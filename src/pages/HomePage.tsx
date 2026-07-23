@@ -97,7 +97,7 @@ export const HomePage = () => {
               { title: 'MAXIMUM INFORMATION GUESSES', desc: 'Each guess maximizes the information you gain', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
               { title: 'AUTOMATIC BOARD DETECTION', desc: 'Reads the Wordle board state automatically', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' },
               { title: 'WORKS ON NYT WORDLE', desc: 'Full compatibility with the official game', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
-              { title: 'WORKS ON WORDLE.NAME', desc: 'Supports the popular Wordle clone', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
+              { title: 'WORKS ON WORDLE UNLIMITED', desc: 'Supports the popular Wordle clone', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
               { title: 'ONE-CLICK START', desc: 'Press Start and the solver handles everything', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
               { title: 'LIGHTWEIGHT EXTENSION', desc: 'Minimal footprint, no bloat', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
               { title: 'FAST SOLVER', desc: 'Entropy calculations complete in milliseconds', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -226,10 +226,10 @@ export const HomePage = () => {
               backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
               textAlign: 'center'
             }}>
-              <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: '0 0 8px 0', letterSpacing: '0.05em' }}>WORDLE.NAME</h3>
-              <a href="https://wordle.name/" target="_blank" rel="noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '14px', fontFamily: '"Inter", sans-serif', textDecoration: 'underline', display: 'block', marginBottom: '16px' }}>wordle.name</a>
+              <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: '0 0 8px 0', letterSpacing: '0.05em' }}>WORDLE UNLIMITED</h3>
+              <a href="https://wordleunlimited.org/" target="_blank" rel="noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '14px', fontFamily: '"Inter", sans-serif', textDecoration: 'underline', display: 'block', marginBottom: '16px' }}>wordleunlimited.org</a>
               <p style={{ fontFamily: '"Inter", sans-serif', color: 'var(--text-secondary)', margin: '0', lineHeight: '1.6' }}>
-                Full support for the popular Wordle.name alternative. Perfect for practice runs or unlimited play, the entropy solver works exactly as it does on the official site.
+                Full support for the popular Wordle Unlimited alternative. Perfect for practice runs or unlimited play, the entropy solver works exactly as it does on the official site.
               </p>
             </motion.div>
           </div>
@@ -254,7 +254,7 @@ export const HomePage = () => {
             {[
               { num: '1', title: 'DOWNLOAD', desc: 'Get the extension files from GitHub' },
               { num: '2', title: 'INSTALL', desc: 'Load it as an unpacked extension in Chrome' },
-              { num: '3', title: 'OPEN WORDLE', desc: 'Navigate to NYT Wordle or wordle.name' },
+              { num: '3', title: 'OPEN WORDLE', desc: 'Navigate to NYT Wordle or wordleunlimited.org' },
               { num: '4', title: 'START SOLVING', desc: 'Click Start and watch the entropy solver work' }
             ].map((step, i) => (
               <motion.div key={i} variants={itemVariants} style={{

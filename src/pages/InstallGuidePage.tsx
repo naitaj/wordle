@@ -62,7 +62,7 @@ export const InstallGuidePage = () => {
       id: 8,
       title: 'OPEN A WORDLE WEBSITE',
       desc: 'NAVIGATE TO ONE OF THE SUPPORTED WEBSITES.',
-      code: 'https://www.nytimes.com/games/wordle/index.html\nhttps://www.wordle.name',
+      code: 'https://www.nytimes.com/games/wordle/index.html\nhttps://wordleunlimited.org/',
     },
     {
       id: 9,

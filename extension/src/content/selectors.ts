@@ -1,5 +1,5 @@
 /**
- * Selector Abstraction Layer for NYT Wordle and Wordle.name DOM.
+ * Selector Abstraction Layer for NYT Wordle and Wordle Unlimited DOM.
  * When either site changes their DOM structure, only this file needs updating.
  * 
  * Strategy: Use data attributes and custom elements (stable) over CSS class names (hashed/unstable).
@@ -36,10 +36,10 @@ export const TILE_STATES = {
 export type NytTileState = typeof TILE_STATES[keyof typeof TILE_STATES];
 
 /**
- * Detect if we are currently running on www.wordle.name.
+ * Detect if we are currently running on wordleunlimited.org.
  */
 export function isWordleName(): boolean {
-  return window.location.hostname.includes('wordle.name');
+  return window.location.hostname.includes('wordleunlimited.org');
 }
 
 /**
@@ -47,7 +47,7 @@ export function isWordleName(): boolean {
  * Returns them in order: row 0 tile 0, row 0 tile 1, ..., row 5 tile 4 (30 total).
  */
 export function findAllTiles(): Element[] {
-  // Support for wordle.name (unofficial unlimited game)
+  // Support for Wordle Unlimited (unofficial unlimited game)
   if (isWordleName()) {
     const gameApp = document.querySelector('game-app');
     if (!gameApp || !gameApp.shadowRoot) return [];

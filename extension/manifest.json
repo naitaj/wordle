@@ -6,7 +6,7 @@
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://www.nytimes.com/*",
-    "https://www.wordle.name/*",
+    "https://*.wordleunlimited.org/*",
     "https://api.groq.com/*"
   ],
   "background": {
@@ -17,7 +17,7 @@
     {
       "matches": [
         "https://www.nytimes.com/games/wordle/*",
-        "https://www.wordle.name/*",
+        "https://*.wordleunlimited.org/*",
         "https://*.vercel.app/*",
         "http://localhost/*"
       ],

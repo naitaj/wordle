@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: "DOES IT WORK ON EVERY WORDLE CLONE?",
-    answer: "The extension is specifically built to work on two websites: the official New York Times Wordle (nytimes.com/games/wordle) and wordle.name. Other Wordle clones may use different page structures that the extension cannot read."
+    answer: "The extension is specifically built to work on two websites: the official New York Times Wordle (nytimes.com/games/wordle) and wordleunlimited.org. Other Wordle clones may use different page structures that the extension cannot read."
   },
   {
     question: "WHY DO I NEED DEVELOPER MODE?",

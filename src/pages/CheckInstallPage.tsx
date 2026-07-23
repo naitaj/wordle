@@ -205,7 +205,7 @@ export const CheckInstallPage = () => {
                     OPEN NYT WORDLE
                   </a>
                   <a 
-                    href="https://www.wordle.name" 
+                    href="https://wordleunlimited.org/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="btn-secondary"
@@ -218,7 +218,7 @@ export const CheckInstallPage = () => {
                       letterSpacing: '1px'
                     }}
                   >
-                    OPEN WORDLE.NAME
+                    OPEN WORDLE UNLIMITED
                   </a>
                 </div>
               </motion.div>

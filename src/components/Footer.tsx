@@ -74,9 +74,9 @@ export function Footer() {
               <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" style={{
                 color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
               }}>NYT Wordle</a>
-              <a href="https://www.wordle.name" target="_blank" rel="noopener noreferrer" style={{
+              <a href="https://wordleunlimited.org/" target="_blank" rel="noopener noreferrer" style={{
                 color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
-              }}>wordle.name</a>
+              }}>wordleunlimited.org</a>
             </div>
           </div>
         </div>

@@ -60,7 +60,7 @@ function readBoardState(): BoardState {
   
   // Check localStorage for reliable game state
   try {
-    if (window.location.hostname.includes('wordle.name')) {
+    if (window.location.hostname.includes('wordleunlimited.org')) {
       const stored = JSON.parse(localStorage.getItem('gameState') || '{}');
       if (stored.gameStatus === 'WIN') gameStatus = 'won';
       else if (stored.gameStatus === 'FAIL') gameStatus = 'lost';
@@ -118,7 +118,7 @@ async function submitGuess(): Promise<void> {
 }
 
 function isRowInvalid(rowIndex: number): boolean {
-  // 1. Support for wordle.name: game-row custom element gets 'invalid' attribute
+  // 1. Support for Wordle Unlimited: game-row custom element gets 'invalid' attribute
   const rows = document.querySelectorAll('game-row');
   if (rows[rowIndex]?.hasAttribute('invalid')) {
     return true;
@@ -199,7 +199,7 @@ function waitForReveal(rowIndex: number): Promise<TileResult[]> {
       }
     });
     
-    // Observe each tile in the row for state changes (NYT: data-state, wordle.name: evaluation/reveal)
+    // Observe each tile in the row for state changes (NYT: data-state, Wordle Unlimited: evaluation/reveal)
     const attributeFilter = ['data-state', 'evaluation', 'reveal'];
     for (const tile of rowTiles) {
       observer.observe(tile, { attributes: true, attributeFilter });

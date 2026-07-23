@@ -113,8 +113,8 @@ async function findWordleTab(): Promise<number | null> {
   if (tabs.length > 0 && tabs[0].id) {
     return tabs[0].id;
   }
-  // Try finding wordle.name tab
-  tabs = await chrome.tabs.query({ url: 'https://www.wordle.name/*' });
+  // Try finding Wordle Unlimited tab
+  tabs = await chrome.tabs.query({ url: 'https://*.wordleunlimited.org/*' });
   if (tabs.length > 0 && tabs[0].id) {
     return tabs[0].id;
   }

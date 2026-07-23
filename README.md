@@ -1,6 +1,6 @@
 # Wordle Entropy Solver
 
-Wordle Entropy Solver is a browser extension and companion website that helps users solve Wordle puzzles using information theory. The extension calculates Shannon entropy to find the guess that eliminates the most remaining words. It works on the official New York Times Wordle page and the wordle.name clone.
+Wordle Entropy Solver is a browser extension and companion website that helps users solve Wordle puzzles using information theory. The extension calculates Shannon entropy to find the guess that eliminates the most remaining words. It works on the official New York Times Wordle page and the wordleunlimited.org clone.
 
 ## Overview
 
