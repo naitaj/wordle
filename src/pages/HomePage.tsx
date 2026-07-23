@@ -254,7 +254,7 @@ export const HomePage = () => {
             {[
               { num: '1', title: 'DOWNLOAD', desc: 'Get the extension files from GitHub' },
               { num: '2', title: 'INSTALL', desc: 'Load it as an unpacked extension in Chrome' },
-              { num: '3', title: 'OPEN WORDLE', desc: 'Navigate to NYT Wordle or wordleunlimited.org' },
+              { num: '3', title: 'OPEN WORDLE', desc: 'Navigate to NYT Wordle or https://wordleunlimited.org/' },
               { num: '4', title: 'START SOLVING', desc: 'Click Start and watch the entropy solver work' }
             ].map((step, i) => (
               <motion.div key={i} variants={itemVariants} style={{
