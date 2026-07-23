@@ -17,7 +17,9 @@
     {
       "matches": [
         "https://www.nytimes.com/games/wordle/*",
-        "https://www.wordle.name/*"
+        "https://www.wordle.name/*",
+        "https://wordle-opal-iota.vercel.app/*",
+        "http://localhost/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],

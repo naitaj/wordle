@@ -511,13 +511,25 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 // ─── Initialization ───
 console.log('[Wordle Solver] Content script loaded on', window.location.href);
-createStatusBadge();
 
-// Initialize mode from storage
-chrome.storage.local.get(['solverMode'], (result) => {
-  if (chrome.runtime.lastError) return;
-  if (result.solverMode === 'auto' || result.solverMode === 'assist') {
-    currentMode = result.solverMode;
-    updateBadgeModeIndicator();
-  }
-});
+const isWebsite = window.location.hostname.includes('localhost') || 
+                  window.location.hostname.includes('vercel.app') ||
+                  window.location.pathname.endsWith('/check');
+
+if (isWebsite) {
+  // Mark extension as installed on the website
+  document.documentElement.dataset.wordleEntropySolverInstalled = 'true';
+  window.dispatchEvent(new CustomEvent('WORDLE_SOLVER_INSTALLED'));
+} else {
+  // Initialize game page badge and settings
+  createStatusBadge();
+
+  // Initialize mode from storage
+  chrome.storage.local.get(['solverMode'], (result) => {
+    if (chrome.runtime.lastError) return;
+    if (result.solverMode === 'auto' || result.solverMode === 'assist') {
+      currentMode = result.solverMode;
+      updateBadgeModeIndicator();
+    }
+  });
+}

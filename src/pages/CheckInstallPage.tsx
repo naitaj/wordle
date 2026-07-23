@@ -8,32 +8,32 @@ export const CheckInstallPage = () => {
   const checkExtension = () => {
     setStatus('checking');
     
+    // 1. Check if the element attribute is already set by the content script
+    if (document.documentElement.dataset.wordleEntropySolverInstalled === 'true') {
+      setTimeout(() => {
+        setStatus('found');
+      }, 600);
+      return;
+    }
+    
+    // 2. Set up listener in case it runs right now
+    const onDetected = () => {
+      setStatus('found');
+      window.removeEventListener('WORDLE_SOLVER_INSTALLED', onDetected);
+      clearTimeout(timeoutId);
+    };
+    
+    window.addEventListener('WORDLE_SOLVER_INSTALLED', onDetected);
+    
     // Timeout fallback if no response is received
     const timeoutId = setTimeout(() => {
-      setStatus('not-found');
-    }, 2000);
-
-    try {
-      const globalChrome = (window as any).chrome;
-      if (globalChrome && globalChrome.runtime && globalChrome.runtime.sendMessage) {
-        // Attempting to message the extension.
-        // Requires the page to be in "externally_connectable" in manifest.json.
-        globalChrome.runtime.sendMessage('extension_id_placeholder', { message: 'ping' }, (response: any) => {
-          clearTimeout(timeoutId);
-          if (globalChrome.runtime.lastError) {
-            setStatus('not-found');
-          } else if (response) {
-            setStatus('found');
-          } else {
-            setStatus('not-found');
-          }
-        });
+      if (document.documentElement.dataset.wordleEntropySolverInstalled === 'true') {
+        setStatus('found');
       } else {
-        // If chrome API is not available, we wait for timeout to set not-found to show the checking state
+        setStatus('not-found');
       }
-    } catch (e) {
-      // Will fall back to timeout
-    }
+      window.removeEventListener('WORDLE_SOLVER_INSTALLED', onDetected);
+    }, 1500);
   };
 
   return (
