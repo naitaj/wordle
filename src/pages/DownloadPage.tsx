@@ -86,7 +86,7 @@ const FileIcon = () => (
 
 export const DownloadPage = () => {
   return (
-    <div style={{ paddingTop: '96px', paddingBottom: '96px', maxWidth: '1200px', margin: '0 auto', paddingLeft: '24px', paddingRight: '24px', color: '#fff', backgroundColor: '#0a0a0a' }}>
+    <div style={{ paddingTop: '96px', paddingBottom: '96px', maxWidth: '1200px', margin: '0 auto', paddingLeft: '24px', paddingRight: '24px', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)' }}>
       
       {/* 1. HEADER */}
       <motion.div 
@@ -96,13 +96,13 @@ export const DownloadPage = () => {
         variants={fadeIn}
         style={{ textAlign: 'center', marginBottom: '80px' }}
       >
-        <span className="section-label font-bebas" style={{ color: '#22c55e', fontSize: '24px', display: 'block', marginBottom: '16px', letterSpacing: '2px' }}>
+        <span className="section-label font-bebas" style={{ color: 'var(--accent-green)', fontSize: '24px', display: 'block', marginBottom: '16px', letterSpacing: '2px' }}>
           DOWNLOAD
         </span>
         <h1 className="font-anton" style={{ fontSize: '72px', margin: '0 0 24px 0', lineHeight: '1.1' }}>
           GET THE EXTENSION
         </h1>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', color: '#a3a3a3', maxWidth: '600px', margin: '0 auto' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
           DOWNLOAD THE UNPACKED EXTENSION TO RUN THE WORDLE ENTROPY SOLVER DIRECTLY IN YOUR BROWSER.
         </p>
       </motion.div>
@@ -115,17 +115,16 @@ export const DownloadPage = () => {
         variants={fadeIn}
         className="card"
         style={{ 
-          backgroundColor: '#161616', 
-          border: '1px solid #2a2a2a', 
+          backgroundColor: 'var(--bg-card)', 
+          border: '1px solid var(--border-primary)', 
           borderRadius: '16px', 
           padding: '48px', 
           textAlign: 'center',
-          marginBottom: '100px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          marginBottom: '100px'
         }}
       >
         <h2 className="font-bebas" style={{ fontSize: '40px', marginBottom: '16px' }}>WORDLE ENTROPY SOLVER V1.0.0</h2>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '18px', color: '#a3a3a3', marginBottom: '40px' }}>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '40px' }}>
           DOWNLOAD THE UNPACKED EXTENSION AND LOAD IT INTO YOUR BROWSER TO GET STARTED IMMEDIATELY.
         </p>
         
@@ -137,36 +136,30 @@ export const DownloadPage = () => {
             alignItems: 'center', 
             justifyContent: 'center',
             gap: '12px',
-            backgroundColor: '#22c55e', 
-            color: '#000', 
             padding: '16px 40px', 
             borderRadius: '8px', 
             fontSize: '24px', 
             textDecoration: 'none',
-            border: 'none',
             cursor: 'pointer',
-            marginBottom: '40px',
-            transition: 'background-color 0.2s'
+            marginBottom: '40px'
           }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#22c55e'}
         >
           <DownloadIcon />
           DOWNLOAD .ZIP
         </a>
 
         <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>
-          <p className="font-condensed" style={{ color: '#a3a3a3', marginBottom: '12px', textTransform: 'uppercase' }}>OR CLONE THE REPOSITORY:</p>
+          <p className="font-condensed" style={{ color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase' }}>OR CLONE THE REPOSITORY:</p>
           <div style={{ 
-            backgroundColor: '#0a0a0a', 
-            border: '1px solid #2a2a2a', 
+            backgroundColor: 'var(--bg-secondary)', 
+            border: '1px solid var(--border-primary)', 
             borderRadius: '8px', 
             padding: '16px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <code style={{ fontFamily: 'monospace', color: '#22c55e', fontSize: '16px' }}>
+            <code style={{ fontFamily: 'monospace', color: 'var(--accent-green)', fontSize: '16px' }}>
               git clone https://github.com/naitaj/wordle.git
             </code>
           </div>
@@ -182,7 +175,7 @@ export const DownloadPage = () => {
         style={{ marginBottom: '100px' }}
       >
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span className="section-label font-bebas" style={{ color: '#f59e0b', fontSize: '20px', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>PLATFORM SUPPORT</span>
+          <span className="section-label font-bebas" style={{ color: 'var(--accent-amber)', fontSize: '20px', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>PLATFORM SUPPORT</span>
           <h2 className="section-title font-anton" style={{ fontSize: '48px', margin: 0 }}>WORKS ON ANY OS</h2>
         </div>
 
@@ -200,8 +193,8 @@ export const DownloadPage = () => {
               variants={fadeIn}
               className="card"
               style={{
-                backgroundColor: '#161616',
-                border: '1px solid #2a2a2a',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-primary)',
                 borderRadius: '12px',
                 padding: '32px',
                 display: 'flex',
@@ -210,9 +203,9 @@ export const DownloadPage = () => {
                 gap: '16px'
               }}
             >
-              <div style={{ color: '#fff', marginBottom: '8px' }}>{os.icon}</div>
+              <div style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>{os.icon}</div>
               <h3 className="font-bebas" style={{ fontSize: '28px', margin: 0 }}>{os.name}</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-green)' }}>
                 <CheckIcon />
                 <span className="font-condensed" style={{ textTransform: 'uppercase', fontSize: '16px' }}>SUPPORTED</span>
               </div>
@@ -230,7 +223,7 @@ export const DownloadPage = () => {
         style={{ marginBottom: '100px' }}
       >
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span className="section-label font-bebas" style={{ color: '#f59e0b', fontSize: '20px', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>BROWSER SUPPORT</span>
+          <span className="section-label font-bebas" style={{ color: 'var(--accent-amber)', fontSize: '20px', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>BROWSER SUPPORT</span>
           <h2 className="section-title font-anton" style={{ fontSize: '48px', margin: 0 }}>CHROMIUM BROWSERS</h2>
         </div>
 
@@ -248,8 +241,8 @@ export const DownloadPage = () => {
               variants={fadeIn}
               className="card"
               style={{
-                backgroundColor: '#161616',
-                border: '1px solid #2a2a2a',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-primary)',
                 borderRadius: '12px',
                 padding: '32px',
                 display: 'flex',
@@ -258,14 +251,14 @@ export const DownloadPage = () => {
                 gap: '16px'
               }}
             >
-              <div style={{ color: '#fff', marginBottom: '8px' }}>{browser.icon}</div>
+              <div style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>{browser.icon}</div>
               <h3 className="font-bebas" style={{ fontSize: '28px', margin: 0 }}>{browser.name}</h3>
-              <p style={{ fontFamily: 'Inter, sans-serif', color: '#a3a3a3', margin: 0, fontSize: '14px', textTransform: 'uppercase' }}>{browser.note}</p>
+              <p style={{ fontFamily: 'Inter, sans-serif', color: 'var(--text-secondary)', margin: 0, fontSize: '14px', textTransform: 'uppercase' }}>{browser.note}</p>
             </motion.div>
           ))}
         </motion.div>
         
-        <p style={{ textAlign: 'center', fontFamily: 'Inter, sans-serif', color: '#a3a3a3', fontSize: '16px', textTransform: 'uppercase' }}>
+        <p style={{ textAlign: 'center', fontFamily: 'Inter, sans-serif', color: 'var(--text-secondary)', fontSize: '16px', textTransform: 'uppercase' }}>
           REQUIRES ANY CHROMIUM-BASED BROWSER WITH DEVELOPER MODE ENABLED.
         </p>
       </motion.div>
@@ -279,13 +272,13 @@ export const DownloadPage = () => {
         style={{ marginBottom: '100px' }}
       >
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span className="section-label font-bebas" style={{ color: '#f59e0b', fontSize: '20px', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>PACKAGE CONTENTS</span>
+          <span className="section-label font-bebas" style={{ color: 'var(--accent-amber)', fontSize: '20px', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>PACKAGE CONTENTS</span>
           <h2 className="section-title font-anton" style={{ fontSize: '48px', margin: 0 }}>WHAT'S INCLUDED</h2>
         </div>
 
         <div style={{ 
-          backgroundColor: '#161616', 
-          border: '1px solid #2a2a2a', 
+          backgroundColor: 'var(--bg-card)', 
+          border: '1px solid var(--border-primary)', 
           borderRadius: '12px', 
           padding: '40px',
           maxWidth: '800px',
@@ -300,12 +293,12 @@ export const DownloadPage = () => {
               { name: 'WORD DICTIONARY', desc: '2,309 ANSWERS + 12,000+ VALID GUESSES INCLUDED.', type: 'file' }
             ].map((item, idx) => (
               <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                <div style={{ color: '#22c55e', marginTop: '4px' }}>
+                <div style={{ color: 'var(--accent-green)', marginTop: '4px' }}>
                   {item.type === 'folder' ? <FolderIcon /> : <FileIcon />}
                 </div>
                 <div>
-                  <h4 className="font-bebas" style={{ fontSize: '24px', margin: '0 0 4px 0', color: '#fff' }}>{item.name}</h4>
-                  <p style={{ fontFamily: 'Inter, sans-serif', color: '#a3a3a3', margin: 0, fontSize: '16px' }}>{item.desc}</p>
+                  <h4 className="font-bebas" style={{ fontSize: '24px', margin: '0 0 4px 0', color: 'var(--text-primary)' }}>{item.name}</h4>
+                  <p style={{ fontFamily: 'Inter, sans-serif', color: 'var(--text-secondary)', margin: 0, fontSize: '16px' }}>{item.desc}</p>
                 </div>
               </li>
             ))}
@@ -319,7 +312,7 @@ export const DownloadPage = () => {
         whileInView="visible" 
         viewport={{ once: true }} 
         variants={fadeIn}
-        style={{ textAlign: 'center', marginBottom: '80px', paddingTop: '40px', borderTop: '1px solid #2a2a2a' }}
+        style={{ textAlign: 'center', marginBottom: '80px', paddingTop: '40px', borderTop: '1px solid var(--border-primary)' }}
       >
         <h2 className="font-anton" style={{ fontSize: '48px', marginBottom: '24px' }}>READY TO INSTALL?</h2>
         <Link 
@@ -327,17 +320,11 @@ export const DownloadPage = () => {
           className="btn-secondary font-bebas"
           style={{ 
             display: 'inline-block',
-            backgroundColor: 'transparent', 
-            color: '#fff', 
-            border: '2px solid #fff',
             padding: '16px 40px', 
             borderRadius: '8px', 
             fontSize: '24px', 
-            textDecoration: 'none',
-            transition: 'all 0.2s'
+            textDecoration: 'none'
           }}
-          onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = '#000'; }}
-          onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#fff'; }}
         >
           VIEW INSTALLATION GUIDE
         </Link>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -33,7 +33,7 @@ const faqs = [
   }
 ];
 
-export const FAQPage: React.FC = () => {
+export const FAQPage = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleOpen = (index: number) => {
@@ -41,7 +41,7 @@ export const FAQPage: React.FC = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#0a0a0a', color: '#ffffff', minHeight: '100vh', paddingTop: '96px', paddingBottom: '96px' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', minHeight: '100vh', paddingTop: '96px', paddingBottom: '96px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
         
         {/* Header Section */}
@@ -54,7 +54,7 @@ export const FAQPage: React.FC = () => {
         >
           <div style={{ 
             fontFamily: '"Bebas Neue", sans-serif', 
-            color: '#22c55e', 
+            color: 'var(--accent-green)', 
             letterSpacing: '2px', 
             fontSize: '18px',
             marginBottom: '16px' 
@@ -72,7 +72,7 @@ export const FAQPage: React.FC = () => {
           <p style={{ 
             fontFamily: '"Inter", sans-serif', 
             fontSize: '20px', 
-            color: '#a3a3a3', 
+            color: 'var(--text-secondary)', 
             maxWidth: '600px', 
             margin: '0 auto' 
           }}>
@@ -91,7 +91,7 @@ export const FAQPage: React.FC = () => {
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div key={index} style={{ borderBottom: '1px solid #2a2a2a' }}>
+              <div key={index} style={{ borderBottom: '1px solid var(--border-primary)' }}>
                 <button 
                   onClick={() => toggleOpen(index)}
                   style={{
@@ -102,7 +102,7 @@ export const FAQPage: React.FC = () => {
                     background: 'none',
                     border: 'none',
                     padding: '24px 0',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     cursor: 'pointer',
                     textAlign: 'left'
                   }}
@@ -124,7 +124,7 @@ export const FAQPage: React.FC = () => {
                       justifyContent: 'center',
                       width: '24px',
                       height: '24px',
-                      color: isOpen ? '#f59e0b' : '#a3a3a3'
+                      color: isOpen ? 'var(--accent-amber)' : 'var(--text-muted)'
                     }}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
@@ -147,7 +147,7 @@ export const FAQPage: React.FC = () => {
                         fontFamily: '"Inter", sans-serif', 
                         fontSize: '16px', 
                         lineHeight: '1.6', 
-                        color: '#a3a3a3' 
+                        color: 'var(--text-secondary)' 
                       }}>
                         {faq.answer}
                       </div>
@@ -166,8 +166,8 @@ export const FAQPage: React.FC = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
           style={{ 
-            backgroundColor: '#161616', 
-            border: '1px solid #2a2a2a', 
+            backgroundColor: 'var(--bg-secondary)', 
+            border: '1px solid var(--border-primary)', 
             borderRadius: '16px', 
             padding: '48px', 
             textAlign: 'center',
@@ -179,14 +179,14 @@ export const FAQPage: React.FC = () => {
             fontFamily: '"Anton", sans-serif', 
             fontSize: '36px', 
             margin: '0 0 16px 0',
-            color: '#ffffff'
+            color: 'var(--text-primary)'
           }}>
             STILL HAVE QUESTIONS?
           </h2>
           <p style={{ 
             fontFamily: '"Inter", sans-serif', 
             fontSize: '16px', 
-            color: '#a3a3a3', 
+            color: 'var(--text-secondary)', 
             margin: '0 0 32px 0' 
           }}>
             Check out our GitHub issues or head back to the installation guide to get started.
@@ -206,8 +206,9 @@ export const FAQPage: React.FC = () => {
                 fontSize: '20px',
                 letterSpacing: '1px',
                 padding: '12px 24px',
-                backgroundColor: '#2a2a2a',
-                color: '#ffffff',
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-accent)',
+                color: 'var(--text-primary)',
                 textDecoration: 'none',
                 borderRadius: '8px',
                 transition: 'background-color 0.2s',
@@ -228,8 +229,8 @@ export const FAQPage: React.FC = () => {
                 fontSize: '20px',
                 letterSpacing: '1px',
                 padding: '12px 24px',
-                backgroundColor: '#22c55e',
-                color: '#000000',
+                backgroundColor: 'var(--accent-green)',
+                color: '#ffffff',
                 textDecoration: 'none',
                 borderRadius: '8px',
                 transition: 'background-color 0.2s'

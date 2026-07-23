@@ -20,7 +20,7 @@ export function Navbar() {
       left: 0,
       right: 0,
       zIndex: 100,
-      background: 'rgba(10, 10, 10, 0.92)',
+      background: 'rgba(255, 255, 255, 0.92)',
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--border-primary)',
     }}>
@@ -38,7 +38,7 @@ export function Navbar() {
           <div style={{
             width: '36px',
             height: '36px',
-            background: '#ffffff',
+            background: '#000000',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -46,7 +46,7 @@ export function Navbar() {
             <span style={{
               fontFamily: '"Anton", sans-serif',
               fontSize: '24px',
-              color: '#000000',
+              color: '#ffffff',
               lineHeight: 1,
               paddingTop: '2px',
             }}>W</span>
@@ -55,7 +55,7 @@ export function Navbar() {
             <span style={{
               fontFamily: '"Anton", sans-serif',
               fontSize: '16px',
-              color: '#ffffff',
+              color: '#000000',
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
             }}>WORDLE ENTROPY</span>
@@ -80,10 +80,10 @@ export function Navbar() {
                 fontFamily: '"Bebas Neue", sans-serif',
                 fontSize: '15px',
                 letterSpacing: '0.1em',
-                color: location.pathname === link.path ? '#ffffff' : 'var(--text-muted)',
+                color: location.pathname === link.path ? '#000000' : 'var(--text-muted)',
                 textDecoration: 'none',
                 padding: '8px 16px',
-                borderBottom: location.pathname === link.path ? '2px solid #ffffff' : '2px solid transparent',
+                borderBottom: location.pathname === link.path ? '2px solid #000000' : '2px solid transparent',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -99,7 +99,7 @@ export function Navbar() {
           style={{
             background: 'transparent',
             border: '1px solid var(--border-accent)',
-            color: '#ffffff',
+            color: '#000000',
             width: '40px',
             height: '40px',
             display: 'flex',
@@ -129,7 +129,7 @@ export function Navbar() {
       {isOpen && (
         <div className="md:hidden" style={{
           borderTop: '1px solid var(--border-primary)',
-          background: 'rgba(10, 10, 10, 0.98)',
+          background: 'rgba(255, 255, 255, 0.98)',
           padding: '8px 0',
         }}>
           {NAV_LINKS.map(link => (
@@ -142,10 +142,10 @@ export function Navbar() {
                 fontFamily: '"Bebas Neue", sans-serif',
                 fontSize: '18px',
                 letterSpacing: '0.1em',
-                color: location.pathname === link.path ? '#ffffff' : 'var(--text-muted)',
+                color: location.pathname === link.path ? '#000000' : 'var(--text-muted)',
                 textDecoration: 'none',
                 padding: '12px 24px',
-                borderLeft: location.pathname === link.path ? '3px solid #ffffff' : '3px solid transparent',
+                borderLeft: location.pathname === link.path ? '3px solid #000000' : '3px solid transparent',
               }}
             >
               {link.label}

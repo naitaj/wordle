@@ -2,19 +2,19 @@
 
 /* ─── Design System ─── */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #161616;
-  --bg-card-hover: #1a1a1a;
-  --border-primary: #2a2a2a;
-  --border-accent: #333333;
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1a1;
-  --text-muted: #666666;
-  --accent-green: #22c55e;
-  --accent-amber: #f59e0b;
-  --accent-green-dim: rgba(34, 197, 94, 0.15);
-  --accent-amber-dim: rgba(245, 158, 11, 0.15);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f4f4f5;
+  --border-primary: #e4e4e7;
+  --border-accent: #000000;
+  --text-primary: #000000;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+  --accent-green: #15803d;
+  --accent-amber: #b45309;
+  --accent-green-dim: rgba(21, 128, 61, 0.1);
+  --accent-amber-dim: rgba(180, 83, 9, 0.1);
 }
 
 * {
@@ -69,13 +69,13 @@ body {
 
 /* ─── Buttons ─── */
 .btn-primary {
-  background: #ffffff;
-  color: #000000;
+  background: #000000;
+  color: #ffffff;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
   letter-spacing: 0.08em;
   padding: 14px 32px;
-  border: 2px solid #ffffff;
+  border: 2px solid #000000;
   cursor: pointer;
   transition: all 0.15s ease;
   text-transform: uppercase;
@@ -87,17 +87,17 @@ body {
 
 .btn-primary:hover {
   background: transparent;
-  color: #ffffff;
+  color: #000000;
 }
 
 .btn-secondary {
   background: transparent;
-  color: #ffffff;
+  color: #000000;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
   letter-spacing: 0.08em;
   padding: 14px 32px;
-  border: 2px solid #333333;
+  border: 2px solid #000000;
   cursor: pointer;
   transition: all 0.15s ease;
   text-transform: uppercase;
@@ -108,7 +108,8 @@ body {
 }
 
 .btn-secondary:hover {
-  border-color: #ffffff;
+  background: #000000;
+  color: #ffffff;
 }
 
 /* ─── Section Styling ─── */
@@ -151,14 +152,14 @@ body {
 }
 
 .step-dot.active {
-  border-color: #ffffff;
-  color: #000000;
-  background: #ffffff;
+  border-color: #000000;
+  color: #ffffff;
+  background: #000000;
 }
 
 .step-dot.completed {
   border-color: var(--accent-green);
-  color: #000000;
+  color: #ffffff;
   background: var(--accent-green);
 }
 

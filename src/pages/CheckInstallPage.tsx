@@ -37,7 +37,7 @@ export const CheckInstallPage = () => {
   };
 
   return (
-    <div style={{ paddingTop: '96px', paddingBottom: '96px', minHeight: '100vh', backgroundColor: '#0a0a0a', color: '#ffffff' }}>
+    <div style={{ paddingTop: '96px', paddingBottom: '96px', minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
         
         {/* HEADER */}
@@ -47,13 +47,13 @@ export const CheckInstallPage = () => {
           viewport={{ once: true }}
           style={{ textAlign: 'center', marginBottom: '60px' }}
         >
-          <div className="section-label" style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#22c55e', letterSpacing: '2px', fontSize: '1.25rem', marginBottom: '16px' }}>
+          <div className="section-label" style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--accent-green)', letterSpacing: '2px', fontSize: '1.25rem', marginBottom: '16px' }}>
             VERIFY
           </div>
           <h1 className="section-title font-anton" style={{ fontFamily: 'Anton, sans-serif', fontSize: '4rem', textTransform: 'uppercase', margin: '0 0 16px 0', letterSpacing: '1px' }}>
             CHECK INSTALLATION
           </h1>
-          <p style={{ fontFamily: 'Inter, sans-serif', color: '#a3a3a3', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto' }}>
+          <p style={{ fontFamily: 'Inter, sans-serif', color: 'var(--text-secondary)', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto' }}>
             VERIFY THAT THE EXTENSION IS INSTALLED AND WORKING CORRECTLY.
           </p>
         </motion.div>
@@ -65,8 +65,8 @@ export const CheckInstallPage = () => {
           viewport={{ once: true }}
           className="card"
           style={{
-            backgroundColor: '#161616',
-            border: '1px solid #2a2a2a',
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-primary)',
             borderRadius: '16px',
             padding: '48px',
             maxWidth: '800px',
@@ -88,7 +88,7 @@ export const CheckInstallPage = () => {
                 transition={{ duration: 0.2 }}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
               >
-                <div style={{ marginBottom: '32px', color: '#a3a3a3' }}>
+                <div style={{ marginBottom: '32px', color: 'var(--text-muted)' }}>
                   <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
                     <path d="M21 3v5h-5" />
@@ -97,16 +97,13 @@ export const CheckInstallPage = () => {
                 <h2 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '2.5rem', margin: '0 0 16px 0', letterSpacing: '1px' }}>
                   READY TO CHECK
                 </h2>
-                <p style={{ fontFamily: 'Inter, sans-serif', color: '#a3a3a3', marginBottom: '32px', maxWidth: '400px' }}>
+                <p style={{ fontFamily: 'Inter, sans-serif', color: 'var(--text-secondary)', marginBottom: '32px', maxWidth: '400px' }}>
                   CLICK THE BUTTON BELOW TO DETECT IF THE WORDLE ASSISTANT EXTENSION IS INSTALLED IN YOUR BROWSER.
                 </p>
                 <button 
                   onClick={checkExtension}
                   className="btn-primary"
                   style={{
-                    backgroundColor: '#22c55e',
-                    color: '#000',
-                    border: 'none',
                     padding: '16px 32px',
                     fontFamily: '"Bebas Neue", sans-serif',
                     fontSize: '1.5rem',
@@ -140,7 +137,7 @@ export const CheckInstallPage = () => {
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                  style={{ marginBottom: '24px', color: '#f59e0b' }}
+                  style={{ marginBottom: '24px', color: 'var(--accent-amber)' }}
                 >
                   <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="2" x2="12" y2="6" />
@@ -153,7 +150,7 @@ export const CheckInstallPage = () => {
                     <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
                   </svg>
                 </motion.div>
-                <h2 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '2rem', margin: '0', color: '#f59e0b', letterSpacing: '1px' }}>
+                <h2 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '2rem', margin: '0', color: 'var(--accent-amber)', letterSpacing: '1px' }}>
                   CHECKING...
                 </h2>
               </motion.div>
@@ -168,25 +165,25 @@ export const CheckInstallPage = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
               >
-                <div style={{ color: '#22c55e', marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ color: 'var(--accent-green)', marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
                   <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
                 </div>
-                <h2 className="font-anton" style={{ fontFamily: 'Anton, sans-serif', fontSize: '3rem', margin: '0 0 32px 0', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <h2 className="font-anton" style={{ fontFamily: 'Anton, sans-serif', fontSize: '3rem', margin: '0 0 32px 0', color: 'var(--accent-green)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                   EXTENSION INSTALLED
                 </h2>
                 
                 <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '40px', flexWrap: 'wrap' }}>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '16px 24px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#22c55e', fontSize: '1.2rem' }}>EXTENSION DETECTED</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '16px 24px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--accent-green)', fontSize: '1.2rem' }}>EXTENSION DETECTED</div>
                   </div>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '16px 24px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#22c55e', fontSize: '1.2rem' }}>READY TO USE</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '16px 24px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--accent-green)', fontSize: '1.2rem' }}>READY TO USE</div>
                   </div>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '16px 24px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#22c55e', fontSize: '1.2rem' }}>COMPATIBLE BROWSER</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '16px 24px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--accent-green)', fontSize: '1.2rem' }}>COMPATIBLE BROWSER</div>
                   </div>
                 </div>
 
@@ -197,9 +194,6 @@ export const CheckInstallPage = () => {
                     rel="noopener noreferrer"
                     className="btn-primary"
                     style={{
-                      backgroundColor: '#22c55e',
-                      color: '#000',
-                      border: 'none',
                       padding: '12px 24px',
                       fontFamily: '"Bebas Neue", sans-serif',
                       fontSize: '1.2rem',
@@ -216,9 +210,6 @@ export const CheckInstallPage = () => {
                     rel="noopener noreferrer"
                     className="btn-secondary"
                     style={{
-                      backgroundColor: 'transparent',
-                      color: '#ffffff',
-                      border: '2px solid #333',
                       padding: '12px 24px',
                       fontFamily: '"Bebas Neue", sans-serif',
                       fontSize: '1.2rem',
@@ -254,21 +245,21 @@ export const CheckInstallPage = () => {
                 </h2>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px', textAlign: 'left' }}>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '20px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#ffffff', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>DEVELOPER MODE NOT ENABLED</div>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#a3a3a3' }}>MAKE SURE DEVELOPER MODE IS TOGGLED ON IN CHROME://EXTENSIONS</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>DEVELOPER MODE NOT ENABLED</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>MAKE SURE DEVELOPER MODE IS TOGGLED ON IN CHROME://EXTENSIONS</div>
                   </div>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '20px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#ffffff', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>EXTENSION NOT LOADED</div>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#a3a3a3' }}>CLICK LOAD UNPACKED AND SELECT THE EXTENSION/DIST FOLDER</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>EXTENSION NOT LOADED</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>CLICK LOAD UNPACKED AND SELECT THE EXTENSION/DIST FOLDER</div>
                   </div>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '20px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#ffffff', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>WRONG BROWSER</div>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#a3a3a3' }}>THE EXTENSION REQUIRES A CHROMIUM-BASED BROWSER (CHROME, EDGE, OR BRAVE)</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>WRONG BROWSER</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>THE EXTENSION REQUIRES A CHROMIUM-BASED BROWSER (CHROME, EDGE, OR BRAVE)</div>
                   </div>
-                  <div style={{ backgroundColor: '#0a0a0a', padding: '20px', borderRadius: '8px', border: '1px solid #2a2a2a' }}>
-                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: '#ffffff', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>EXTENSION DISABLED</div>
-                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#a3a3a3' }}>CHECK THAT THE EXTENSION IS NOT DISABLED IN YOUR BROWSER'S EXTENSION LIST</div>
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
+                    <div style={{ fontFamily: '"Bebas Neue", sans-serif', color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '8px', letterSpacing: '1px' }}>EXTENSION DISABLED</div>
+                    <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>CHECK THAT THE EXTENSION IS NOT DISABLED IN YOUR BROWSER'S EXTENSION LIST</div>
                   </div>
                 </div>
 
@@ -277,9 +268,6 @@ export const CheckInstallPage = () => {
                     to="/install" 
                     className="btn-primary"
                     style={{
-                      backgroundColor: '#2a2a2a',
-                      color: '#ffffff',
-                      border: 'none',
                       padding: '12px 24px',
                       fontFamily: '"Bebas Neue", sans-serif',
                       fontSize: '1.2rem',
@@ -299,10 +287,8 @@ export const CheckInstallPage = () => {
                   </Link>
                   <button 
                     onClick={checkExtension}
+                    className="btn-secondary"
                     style={{
-                      backgroundColor: 'transparent',
-                      color: '#a3a3a3',
-                      border: '1px solid #333',
                       padding: '12px 24px',
                       fontFamily: '"Bebas Neue", sans-serif',
                       fontSize: '1.2rem',

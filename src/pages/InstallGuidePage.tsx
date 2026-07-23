@@ -100,11 +100,11 @@ export const InstallGuidePage = () => {
 
   return (
     <div style={{
-      backgroundColor: '#0a0a0a',
+      backgroundColor: 'var(--bg-primary)',
       minHeight: '100vh',
       paddingTop: '96px',
       paddingBottom: '80px',
-      color: '#ffffff'
+      color: 'var(--text-primary)'
     }}>
       <div style={{
         maxWidth: '1200px',
@@ -118,7 +118,7 @@ export const InstallGuidePage = () => {
             STEP BY STEP GUIDE
           </h1>
           <p style={{
-            color: '#a3a3a3',
+            color: 'var(--text-secondary)',
             fontSize: '18px',
             marginTop: '16px',
             maxWidth: '600px',
@@ -134,10 +134,10 @@ export const InstallGuidePage = () => {
           position: 'sticky',
           top: '80px',
           zIndex: 10,
-          backgroundColor: 'rgba(10, 10, 10, 0.9)',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(12px)',
           padding: '20px',
-          border: '1px solid #2a2a2a',
+          border: '1px solid var(--border-primary)',
           borderRadius: '16px',
           marginBottom: '48px'
         }}>
@@ -148,11 +148,14 @@ export const InstallGuidePage = () => {
                 style={{
                   flex: 1,
                   height: '4px',
-                  backgroundColor: activeStep >= step.id ? '#22c55e' : '#2a2a2a',
+                  backgroundColor: activeStep >= step.id ? 'var(--accent-green)' : 'var(--border-primary)',
                   transition: 'background-color 0.3s ease'
                 }} 
               />
             ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)' }}>
+            STEP {activeStep} OF {steps.length}
           </div>
         </div>
 
@@ -169,8 +172,8 @@ export const InstallGuidePage = () => {
               style={{
                 display: 'flex',
                 gap: '32px',
-                backgroundColor: '#161616',
-                border: '1px solid #2a2a2a',
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-primary)',
                 borderRadius: '16px',
                 padding: '40px',
                 alignItems: 'flex-start'
@@ -181,8 +184,8 @@ export const InstallGuidePage = () => {
                 flexShrink: 0,
                 width: '64px',
                 height: '64px',
-                backgroundColor: '#2a2a2a',
-                color: '#22c55e',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--accent-green)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -196,19 +199,19 @@ export const InstallGuidePage = () => {
                 <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: '0 0 16px 0', letterSpacing: '1px', textTransform: 'uppercase' }}>
                   {step.title}
                 </h3>
-                <p style={{ color: '#d4d4d4', fontSize: '16px', lineHeight: 1.6, margin: '0 0 24px 0', whiteSpace: 'pre-line' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: 1.6, margin: '0 0 24px 0', whiteSpace: 'pre-line' }}>
                   {step.desc}
                 </p>
                 
                 {step.code && (
                   <pre style={{
-                    backgroundColor: '#0a0a0a',
-                    border: '1px solid #2a2a2a',
+                    backgroundColor: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-primary)',
                     padding: '20px',
                     borderRadius: '8px',
                     overflowX: 'auto',
                     margin: 0,
-                    color: '#f59e0b',
+                    color: 'var(--accent-amber)',
                     fontFamily: 'monospace',
                     fontSize: '14px'
                   }}>
@@ -221,8 +224,8 @@ export const InstallGuidePage = () => {
                     to={step.link.url}
                     style={{
                       display: 'inline-block',
-                      backgroundColor: '#22c55e',
-                      color: '#000000',
+                      backgroundColor: 'var(--accent-green)',
+                      color: '#ffffff',
                       padding: '12px 24px',
                       textDecoration: 'none',
                       fontFamily: '"Bebas Neue", sans-serif',
@@ -240,7 +243,7 @@ export const InstallGuidePage = () => {
         </div>
 
         {/* Bottom CTA */}
-        <section style={{ textAlign: 'center', backgroundColor: '#161616', border: '1px solid #2a2a2a', borderRadius: '24px', padding: '60px 40px' }}>
+        <section style={{ textAlign: 'center', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '24px', padding: '60px 40px' }}>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -251,10 +254,10 @@ export const InstallGuidePage = () => {
             </h2>
             <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontFamily: '"Roboto Condensed", sans-serif', fontSize: '16px', color: '#a3a3a3', textTransform: 'uppercase' }}>INSTALLATION COMPLETE?</span>
+                <span style={{ fontFamily: '"Roboto Condensed", sans-serif', fontSize: '16px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>INSTALLATION COMPLETE?</span>
                 <Link to="/check" style={{
-                  backgroundColor: '#22c55e',
-                  color: '#000000',
+                  backgroundColor: 'var(--accent-green)',
+                  color: '#ffffff',
                   padding: '16px 32px',
                   textDecoration: 'none',
                   fontFamily: '"Bebas Neue", sans-serif',
@@ -269,11 +272,11 @@ export const InstallGuidePage = () => {
                 </Link>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontFamily: '"Roboto Condensed", sans-serif', fontSize: '16px', color: '#a3a3a3', textTransform: 'uppercase' }}>HAVING TROUBLE?</span>
+                <span style={{ fontFamily: '"Roboto Condensed", sans-serif', fontSize: '16px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>HAVING TROUBLE?</span>
                 <Link to="/faq" style={{
                   backgroundColor: 'transparent',
-                  color: '#ffffff',
-                  border: '2px solid #2a2a2a',
+                  color: 'var(--text-primary)',
+                  border: '2px solid var(--border-accent)',
                   padding: '14px 32px',
                   textDecoration: 'none',
                   fontFamily: '"Bebas Neue", sans-serif',

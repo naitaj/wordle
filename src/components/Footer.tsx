@@ -19,12 +19,12 @@ export function Footer() {
         <div style={{ maxWidth: '280px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
             <div style={{
-              width: '28px', height: '28px', background: '#ffffff',
+              width: '28px', height: '28px', background: '#000000',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '18px', color: '#000', paddingTop: '1px' }}>W</span>
+              <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '18px', color: '#fff', paddingTop: '1px' }}>W</span>
             </div>
-            <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '14px', color: '#fff', letterSpacing: '0.05em' }}>WORDLE ENTROPY</span>
+            <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '14px', color: '#000000', letterSpacing: '0.05em' }}>WORDLE ENTROPY</span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
             Solve Wordle using Information Theory. An open-source browser extension built with Shannon entropy.
