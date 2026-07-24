@@ -39,8 +39,9 @@ export const InstallGuidePage = () => {
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: "CLICKING ANYWHERE ON THIS CARD WILL COPY 'chrome://extensions' TO YOUR CLIPBOARD FOR QUICK PASTING.",
+      desc: "CLICKING ANYWHERE ON THIS CARD WILL COPY 'chrome://extensions' TO YOUR CLIPBOARD. WE WILL ALSO ATTEMPT TO OPEN THE PAGE IN A NEW TAB.",
       code: 'chrome://extensions',
+      link: { text: 'OPEN CHROME EXTENSIONS', url: 'chrome://extensions' },
       actionLabel: 'CLICK TO COPY URL & OPEN PAGE'
     },
     {
@@ -251,23 +252,45 @@ export const InstallGuidePage = () => {
                 )}
                 
                 {step.link && (
-                  <Link 
-                    to={step.link.url}
-                    onClick={(e) => e.stopPropagation()} // Prevent double firing click handler
-                    style={{
-                      display: 'inline-block',
-                      backgroundColor: 'var(--accent-green)',
-                      color: '#ffffff',
-                      padding: '12px 24px',
-                      textDecoration: 'none',
-                      fontFamily: '"Bebas Neue", sans-serif',
-                      fontSize: '20px',
-                      borderRadius: '8px',
-                      marginTop: '16px'
-                    }}
-                  >
-                    {step.link.text}
-                  </Link>
+                  step.link.url.startsWith('/') ? (
+                    <Link 
+                      to={step.link.url}
+                      onClick={(e) => e.stopPropagation()} // Prevent double firing click handler
+                      style={{
+                        display: 'inline-block',
+                        backgroundColor: 'var(--accent-green)',
+                        color: '#ffffff',
+                        padding: '12px 24px',
+                        textDecoration: 'none',
+                        fontFamily: '"Bebas Neue", sans-serif',
+                        fontSize: '20px',
+                        borderRadius: '8px',
+                        marginTop: '16px'
+                      }}
+                    >
+                      {step.link.text}
+                    </Link>
+                  ) : (
+                    <a 
+                      href={step.link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()} // Prevent double firing click handler
+                      style={{
+                        display: 'inline-block',
+                        backgroundColor: 'var(--accent-green)',
+                        color: '#ffffff',
+                        padding: '12px 24px',
+                        textDecoration: 'none',
+                        fontFamily: '"Bebas Neue", sans-serif',
+                        fontSize: '20px',
+                        borderRadius: '8px',
+                        marginTop: '16px'
+                      }}
+                    >
+                      {step.link.text}
+                    </a>
+                  )
                 )}
 
                 {step.actionLabel && (
