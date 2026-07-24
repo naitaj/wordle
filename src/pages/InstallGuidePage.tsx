@@ -3,8 +3,18 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export const InstallGuidePage = () => {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    // Auto clear after 3 seconds
+    const timer = setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+    return () => clearTimeout(timer);
+  };
 
   interface Step {
     id: number;
@@ -15,39 +25,76 @@ export const InstallGuidePage = () => {
       text: string;
       url: string;
     };
+    actionLabel?: string;
   }
 
   const steps: Step[] = [
     {
       id: 1,
       title: 'DOWNLOAD THE EXTENSION',
-      desc: 'CLICK HERE TO DOWNLOAD THE EXTENSION ZIP FILE AND EXTRACT IT ON YOUR COMPUTER.',
+      desc: 'CLICKING ANYWHERE ON THIS CARD WILL AUTOMATICALLY DOWNLOAD THE EXTENSION ZIP FILE TO YOUR COMPUTER.',
       code: 'Click this card to download ZIP directly\nOr clone: git clone https://github.com/naitaj/wordle.git',
+      actionLabel: 'CLICK TO DOWNLOAD ZIP FILE'
     },
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: "OPEN YOUR BROWSER'S EXTENSION MANAGEMENT PAGE.",
+      desc: "CLICKING ANYWHERE ON THIS CARD WILL COPY 'chrome://extensions' TO YOUR CLIPBOARD FOR QUICK PASTING.",
       code: 'chrome://extensions',
+      actionLabel: 'CLICK TO COPY URL & OPEN PAGE'
     },
     {
       id: 3,
       title: 'ENABLE DEVELOPER MODE',
-      desc: 'TOGGLE THE DEVELOPER MODE SWITCH IN THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.',
+      desc: 'CLICKING ANYWHERE ON THIS CARD WILL COPY THE STEP INSTRUCTIONS. TOGGLE DEVELOPER MODE SWITCH ON THE TOP-RIGHT CORNER.',
+      actionLabel: 'CLICK TO COPY TOGGLE INSTRUCTION'
     },
     {
       id: 4,
       title: 'LOAD THE EXTENSION',
-      desc: 'CLICK "LOAD UNPACKED" AND SELECT THE "EXTENSION/DIST" FOLDER FROM THE EXTRACTED DIRECTORY.',
+      desc: 'CLICKING ANYWHERE ON THIS CARD WILL COPY the "extension/dist" PATH. CLICK "LOAD UNPACKED" AND SELECT THAT FOLDER.',
+      actionLabel: 'CLICK TO COPY FOLDER PATH'
     },
     {
       id: 5,
       title: 'START SOLVING!',
-      desc: 'NAVIGATE TO ONE OF THE SUPPORTED WEBSITES AND CLICK THE BADGE TO START THE SOLVER.',
+      desc: 'CLICKING ANYWHERE ON THIS CARD WILL LAUNCH THE COMPANION WORDLE GAMES AND START THE SOLVER.',
       code: 'https://www.nytimes.com/games/wordle/index.html\nhttps://wordleunlimited.org/',
       link: { text: 'CHECK INSTALLATION', url: '/check' },
+      actionLabel: 'CLICK TO LAUNCH GAME SITES'
     },
   ];
+
+  const handleCardClick = (stepId: number) => {
+    switch (stepId) {
+      case 1:
+        window.location.href = 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip';
+        showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
+        break;
+      case 2:
+        navigator.clipboard.writeText('chrome://extensions');
+        showToast('📋 COPIED "chrome://extensions" TO CLIPBOARD!');
+        try {
+          window.open('chrome://extensions', '_blank');
+        } catch (e) {
+          // ignore popup blocker
+        }
+        break;
+      case 3:
+        navigator.clipboard.writeText('In chrome://extensions, toggle on the "Developer mode" switch in the top-right corner.');
+        showToast('📋 COPIED DEVELOPER MODE INSTRUCTION!');
+        break;
+      case 4:
+        navigator.clipboard.writeText('extension/dist');
+        showToast('📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
+        break;
+      case 5:
+        window.open('https://wordleunlimited.org/', '_blank');
+        window.open('https://www.nytimes.com/games/wordle/index.html', '_blank');
+        showToast('🎯 OPENED GAME SITES IN NEW TABS!');
+        break;
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -120,9 +167,7 @@ export const InstallGuidePage = () => {
                 key={step.id} 
                 onClick={() => {
                   stepRefs.current[step.id - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  if (step.id === 1) {
-                    window.location.href = 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip';
-                  }
+                  handleCardClick(step.id);
                 }}
                 title={`Go to Step ${step.id}: ${step.title}`}
                 style={{
@@ -151,10 +196,8 @@ export const InstallGuidePage = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              onClick={step.id === 1 ? () => {
-                window.location.href = 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip';
-              } : undefined}
-              whileHover={step.id === 1 ? { scale: 1.01 } : undefined}
+              onClick={() => handleCardClick(step.id)}
+              whileHover={{ scale: 1.01 }}
               style={{
                 display: 'flex',
                 gap: '32px',
@@ -163,7 +206,7 @@ export const InstallGuidePage = () => {
                 borderRadius: '16px',
                 padding: '40px',
                 alignItems: 'flex-start',
-                cursor: step.id === 1 ? 'pointer' : 'default',
+                cursor: 'pointer',
                 transition: 'all 0.3s ease'
               }}
               className="flex-col md:flex-row"
@@ -210,6 +253,7 @@ export const InstallGuidePage = () => {
                 {step.link && (
                   <Link 
                     to={step.link.url}
+                    onClick={(e) => e.stopPropagation()} // Prevent double firing click handler
                     style={{
                       display: 'inline-block',
                       backgroundColor: 'var(--accent-green)',
@@ -224,6 +268,26 @@ export const InstallGuidePage = () => {
                   >
                     {step.link.text}
                   </Link>
+                )}
+
+                {step.actionLabel && (
+                  <div style={{
+                    marginTop: '16px',
+                    fontFamily: '"Roboto Condensed", sans-serif',
+                    fontSize: '12px',
+                    color: 'var(--accent-green)',
+                    letterSpacing: '0.15em',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    {step.actionLabel} (TASK CARRIED OUT ON CLICK)
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -281,6 +345,30 @@ export const InstallGuidePage = () => {
             </div>
           </motion.div>
         </section>
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            style={{
+              position: 'fixed',
+              bottom: '40px',
+              right: '40px',
+              backgroundColor: '#000000',
+              color: '#ffffff',
+              padding: '16px 24px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-primary)',
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontSize: '18px',
+              letterSpacing: '1px',
+              zIndex: 1000,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+            }}
+          >
+            {toastMessage}
+          </motion.div>
+        )}
 
       </div>
     </div>
