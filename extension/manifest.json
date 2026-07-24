@@ -7,6 +7,7 @@
   "host_permissions": [
     "https://www.nytimes.com/*",
     "https://*.wordleunlimited.org/*",
+    "https://wordleunlimited.org/*",
     "https://api.groq.com/*"
   ],
   "background": {
@@ -18,6 +19,7 @@
       "matches": [
         "https://www.nytimes.com/games/wordle/*",
         "https://*.wordleunlimited.org/*",
+        "https://wordleunlimited.org/*",
         "https://*.vercel.app/*",
         "http://localhost/*"
       ],

@@ -103,7 +103,7 @@ export function Popup() {
           chrome.tabs.sendMessage(tabs[0].id, { type: 'SET_TYPING_DELAY', delay: value });
         }
       });
-      chrome.tabs.query({ url: 'https://*.wordleunlimited.org/*' }, (tabs) => {
+      chrome.tabs.query({ url: ['https://wordleunlimited.org/*', 'https://*.wordleunlimited.org/*'] }, (tabs) => {
         if (tabs[0]?.id) {
           chrome.tabs.sendMessage(tabs[0].id, { type: 'SET_TYPING_DELAY', delay: value });
         }

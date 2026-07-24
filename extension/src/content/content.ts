@@ -93,17 +93,35 @@ function sleep(ms: number): Promise<void> {
 }
 
 function simulateKeyPress(key: string): void {
-  // Dispatch on both window and document for maximum compatibility
+  const isEnter = key === 'Enter';
+  const isBackspace = key === 'Backspace';
+  const keyUpper = key.toUpperCase();
+
   const eventInit: KeyboardEventInit = {
     key: key,
-    code: key === 'Enter' ? 'Enter' : key === 'Backspace' ? 'Backspace' : `Key${key.toUpperCase()}`,
-    keyCode: key === 'Enter' ? 13 : key === 'Backspace' ? 8 : key.toUpperCase().charCodeAt(0),
-    which: key === 'Enter' ? 13 : key === 'Backspace' ? 8 : key.toUpperCase().charCodeAt(0),
+    code: isEnter ? 'Enter' : isBackspace ? 'Backspace' : `Key${keyUpper}`,
+    keyCode: isEnter ? 13 : isBackspace ? 8 : keyUpper.charCodeAt(0),
+    which: isEnter ? 13 : isBackspace ? 8 : keyUpper.charCodeAt(0),
     bubbles: true,
     cancelable: true,
   };
-  
-  window.dispatchEvent(new KeyboardEvent('keydown', eventInit));
+
+  // Dispatch keydown
+  const keydownEvent = new KeyboardEvent('keydown', eventInit);
+  document.dispatchEvent(keydownEvent);
+  window.dispatchEvent(keydownEvent);
+
+  // Dispatch keypress (only for printable/Enter keys)
+  if (!isBackspace) {
+    const keypressEvent = new KeyboardEvent('keypress', eventInit);
+    document.dispatchEvent(keypressEvent);
+    window.dispatchEvent(keypressEvent);
+  }
+
+  // Dispatch keyup
+  const keyupEvent = new KeyboardEvent('keyup', eventInit);
+  document.dispatchEvent(keyupEvent);
+  window.dispatchEvent(keyupEvent);
 }
 
 async function typeWord(word: string, delay: number): Promise<void> {
@@ -119,7 +137,13 @@ async function submitGuess(): Promise<void> {
 
 function isRowInvalid(rowIndex: number): boolean {
   // 1. Support for Wordle Unlimited: game-row custom element gets 'invalid' attribute
-  const rows = document.querySelectorAll('game-row');
+  let rows: Element[] = [];
+  const gameApp = document.querySelector('game-app');
+  if (gameApp?.shadowRoot) {
+    rows = Array.from(gameApp.shadowRoot.querySelectorAll('game-row'));
+  } else {
+    rows = Array.from(document.querySelectorAll('game-row'));
+  }
   if (rows[rowIndex]?.hasAttribute('invalid')) {
     return true;
   }
