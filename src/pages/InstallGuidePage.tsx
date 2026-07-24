@@ -21,58 +21,31 @@ export const InstallGuidePage = () => {
     {
       id: 1,
       title: 'DOWNLOAD THE EXTENSION',
-      desc: 'DOWNLOAD THE REPOSITORY AS A ZIP FILE OR CLONE IT USING GIT.',
-      code: 'git clone https://github.com/naitaj/wordle.git\n# Or download ZIP from GitHub',
+      desc: 'CLICK HERE TO DOWNLOAD THE EXTENSION ZIP FILE AND EXTRACT IT ON YOUR COMPUTER.',
+      code: 'Click this card to download ZIP directly\nOr clone: git clone https://github.com/naitaj/wordle.git',
     },
     {
       id: 2,
-      title: 'INSTALL DEPENDENCIES',
-      desc: 'OPEN A TERMINAL IN THE PROJECT FOLDER AND INSTALL DEPENDENCIES.',
-      code: 'npm install',
-    },
-    {
-      id: 3,
-      title: 'BUILD THE EXTENSION',
-      desc: 'RUN THE BUILD SCRIPT TO COMPILE THE EXTENSION FILES.\nTHIS CREATES THE EXTENSION/DIST FOLDER WITH ALL COMPILED FILES.',
-      code: 'node extension/build.js',
-    },
-    {
-      id: 4,
       title: 'OPEN CHROME EXTENSIONS',
       desc: "OPEN YOUR BROWSER'S EXTENSION MANAGEMENT PAGE.",
       code: 'chrome://extensions',
     },
     {
-      id: 5,
+      id: 3,
       title: 'ENABLE DEVELOPER MODE',
       desc: 'TOGGLE THE DEVELOPER MODE SWITCH IN THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.',
     },
     {
-      id: 6,
+      id: 4,
       title: 'LOAD THE EXTENSION',
-      desc: 'CLICK "LOAD UNPACKED" AND SELECT THE EXTENSION/DIST FOLDER FROM THE PROJECT DIRECTORY.',
+      desc: 'CLICK "LOAD UNPACKED" AND SELECT THE "EXTENSION/DIST" FOLDER FROM THE EXTRACTED DIRECTORY.',
     },
     {
-      id: 7,
-      title: 'VERIFY INSTALLATION',
-      desc: 'YOU SHOULD SEE THE WORDLE ENTROPY SOLVER APPEAR IN YOUR EXTENSIONS LIST WITH ITS GREEN ICON.',
-      link: { text: 'CHECK INSTALLATION', url: '/check' },
-    },
-    {
-      id: 8,
-      title: 'OPEN A WORDLE WEBSITE',
-      desc: 'NAVIGATE TO ONE OF THE SUPPORTED WEBSITES.',
+      id: 5,
+      title: 'START SOLVING!',
+      desc: 'NAVIGATE TO ONE OF THE SUPPORTED WEBSITES AND CLICK THE BADGE TO START THE SOLVER.',
       code: 'https://www.nytimes.com/games/wordle/index.html\nhttps://wordleunlimited.org/',
-    },
-    {
-      id: 9,
-      title: 'CLICK THE EXTENSION ICON',
-      desc: 'CLICK THE WORDLE ENTROPY SOLVER ICON IN YOUR BROWSER TOOLBAR TO OPEN THE POPUP.',
-    },
-    {
-      id: 10,
-      title: 'PRESS START',
-      desc: 'SELECT AUTO SOLVE OR ASSIST MODE, THEN PRESS START SOLVING. THE EXTENSION READS THE BOARD AND CALCULATES THE BEST GUESS USING ENTROPY.',
+      link: { text: 'CHECK INSTALLATION', url: '/check' },
     },
   ];
 
@@ -125,7 +98,7 @@ export const InstallGuidePage = () => {
             margin: '16px auto 0',
             lineHeight: 1.6
           }}>
-            FOLLOW THESE STEPS TO INSTALL AND START USING THE WORDLE ENTROPY SOLVER BROWSER EXTENSION.
+            FOLLOW THESE SIMPLE STEPS TO INSTALL AND START USING THE WORDLE ENTROPY SOLVER BROWSER EXTENSION.
           </p>
         </div>
 
@@ -134,7 +107,7 @@ export const InstallGuidePage = () => {
           position: 'sticky',
           top: '80px',
           zIndex: 10,
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(12px)',
           padding: '20px',
           border: '1px solid var(--border-primary)',
@@ -145,17 +118,26 @@ export const InstallGuidePage = () => {
             {steps.map((step) => (
               <div 
                 key={step.id} 
+                onClick={() => {
+                  stepRefs.current[step.id - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  if (step.id === 1) {
+                    window.location.href = 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip';
+                  }
+                }}
+                title={`Go to Step ${step.id}: ${step.title}`}
                 style={{
                   flex: 1,
-                  height: '4px',
+                  height: '8px',
                   backgroundColor: activeStep >= step.id ? 'var(--accent-green)' : 'var(--border-primary)',
-                  transition: 'background-color 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  borderRadius: '4px'
                 }} 
               />
             ))}
           </div>
-          <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)' }}>
-            STEP {activeStep} OF {steps.length}
+          <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+            STEP {activeStep} OF {steps.length} — {steps[activeStep - 1]?.title}
           </div>
         </div>
 
@@ -169,14 +151,20 @@ export const InstallGuidePage = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.5, delay: 0.1 }}
+              onClick={step.id === 1 ? () => {
+                window.location.href = 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip';
+              } : undefined}
+              whileHover={step.id === 1 ? { scale: 1.01 } : undefined}
               style={{
                 display: 'flex',
                 gap: '32px',
                 backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border-primary)',
+                border: step.id === activeStep ? '1.5px solid var(--accent-green)' : '1px solid var(--border-primary)',
                 borderRadius: '16px',
                 padding: '40px',
-                alignItems: 'flex-start'
+                alignItems: 'flex-start',
+                cursor: step.id === 1 ? 'pointer' : 'default',
+                transition: 'all 0.3s ease'
               }}
               className="flex-col md:flex-row"
             >
