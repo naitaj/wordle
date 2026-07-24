@@ -103,12 +103,21 @@ export function Footer() {
         }}>
           v1.0.0 — MIT License
         </span>
-        <span style={{
-          fontSize: '11px',
-          color: 'var(--text-muted)',
-        }}>
+        <a 
+          href="https://www.linkedin.com/in/naila-s-a112b2374/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            fontSize: '11px',
+            color: 'var(--text-muted)',
+            textDecoration: 'none',
+            transition: 'color 0.2s ease',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+        >
           Built by Naila
-        </span>
+        </a>
       </div>
     </footer>
   );
