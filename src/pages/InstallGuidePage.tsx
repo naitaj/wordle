@@ -32,37 +32,37 @@ export const InstallGuidePage = () => {
     {
       id: 1,
       title: 'DOWNLOAD THE EXTENSION',
-      desc: 'CLICKING ANYWHERE ON THIS CARD WILL AUTOMATICALLY DOWNLOAD THE EXTENSION ZIP FILE TO YOUR COMPUTER.',
+      desc: 'DOWNLOAD THE EXTENSION ZIP FILE AND EXTRACT IT ON YOUR COMPUTER.',
       code: 'Click this card to download ZIP directly\nOr clone: git clone https://github.com/naitaj/wordle.git',
-      actionLabel: 'CLICK TO DOWNLOAD ZIP FILE'
+      actionLabel: 'DOWNLOAD ZIP FILE'
     },
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: "CLICKING ANYWHERE ON THIS CARD WILL COPY 'chrome://extensions' TO YOUR CLIPBOARD. WE WILL ALSO ATTEMPT TO OPEN THE PAGE IN A NEW TAB.",
+      desc: "OPEN YOUR BROWSER'S EXTENSION MANAGEMENT PAGE.",
       code: 'chrome://extensions',
       link: { text: 'OPEN CHROME EXTENSIONS', url: 'chrome://extensions' },
-      actionLabel: 'CLICK TO COPY URL & OPEN PAGE'
+      actionLabel: 'COPY URL & OPEN PAGE'
     },
     {
       id: 3,
       title: 'ENABLE DEVELOPER MODE',
-      desc: 'CLICKING ANYWHERE ON THIS CARD WILL COPY THE STEP INSTRUCTIONS. TOGGLE DEVELOPER MODE SWITCH ON THE TOP-RIGHT CORNER.',
-      actionLabel: 'CLICK TO COPY TOGGLE INSTRUCTION'
+      desc: 'TOGGLE THE DEVELOPER MODE SWITCH IN THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.',
+      actionLabel: 'COPY TOGGLE INSTRUCTIONS'
     },
     {
       id: 4,
       title: 'LOAD THE EXTENSION',
-      desc: 'CLICKING ANYWHERE ON THIS CARD WILL COPY the "extension/dist" PATH. CLICK "LOAD UNPACKED" AND SELECT THAT FOLDER.',
-      actionLabel: 'CLICK TO COPY FOLDER PATH'
+      desc: 'CLICK "LOAD UNPACKED" AND SELECT THE "EXTENSION/DIST" FOLDER FROM THE EXTRACTED DIRECTORY.',
+      actionLabel: 'COPY FOLDER PATH "extension/dist"'
     },
     {
       id: 5,
       title: 'START SOLVING!',
-      desc: 'CLICKING ANYWHERE ON THIS CARD WILL LAUNCH THE COMPANION WORDLE GAMES AND START THE SOLVER.',
+      desc: 'NAVIGATE TO ONE OF THE SUPPORTED WEBSITES AND CLICK THE BADGE TO START THE SOLVER.',
       code: 'https://www.nytimes.com/games/wordle/index.html\nhttps://wordleunlimited.org/',
       link: { text: 'CHECK INSTALLATION', url: '/check' },
-      actionLabel: 'CLICK TO LAUNCH GAME SITES'
+      actionLabel: 'LAUNCH GAME SITES'
     },
   ];
 
@@ -132,7 +132,6 @@ export const InstallGuidePage = () => {
         margin: '0 auto',
         padding: '0 24px'
       }}>
-        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>
           <span className="section-label">INSTALLATION</span>
           <h1 className="section-title" style={{ fontSize: '48px', marginTop: '8px' }}>
@@ -148,6 +147,23 @@ export const InstallGuidePage = () => {
           }}>
             FOLLOW THESE SIMPLE STEPS TO INSTALL AND START USING THE WORDLE ENTROPY SOLVER BROWSER EXTENSION.
           </p>
+          <div style={{
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: '8px',
+            padding: '12px 24px',
+            color: 'var(--accent-green)',
+            fontFamily: '"Roboto Condensed", sans-serif',
+            fontSize: '14px',
+            letterSpacing: '0.1em',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            maxWidth: '600px',
+            margin: '24px auto 0',
+            textAlign: 'center'
+          }}>
+            💡 Tip: Clicking any step card below automatically triggers its task (Download ZIP, copy paths, or launch pages).
+          </div>
         </div>
 
         {/* Progress Tracker */}
@@ -309,7 +325,7 @@ export const InstallGuidePage = () => {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    {step.actionLabel} (TASK CARRIED OUT ON CLICK)
+                    {step.actionLabel}
                   </div>
                 )}
               </div>
