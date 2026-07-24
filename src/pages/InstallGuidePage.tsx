@@ -9,11 +9,55 @@ export const InstallGuidePage = () => {
 
   const showToast = (message: string) => {
     setToastMessage(message);
-    // Auto clear after 3 seconds
-    const timer = setTimeout(() => {
-      setToastMessage(null);
-    }, 3000);
-    return () => clearTimeout(timer);
+  };
+
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
+  const fallbackCopy = (text: string, successMessage: string) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful) {
+        showToast(successMessage);
+      } else {
+        showToast('❌ COPY FAILED. PLEASE SELECT AND COPY MANUALLY.');
+      }
+    } catch (err) {
+      console.error('Fallback copy failed', err);
+      showToast('❌ COPY FAILED. PLEASE SELECT AND COPY MANUALLY.');
+    }
+  };
+
+  const copyText = (text: string, successMessage: string) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => showToast(successMessage))
+          .catch((err) => {
+            console.warn('Clipboard write failed, trying fallback', err);
+            fallbackCopy(text, successMessage);
+          });
+      } else {
+        fallbackCopy(text, successMessage);
+      }
+    } catch (e) {
+      fallbackCopy(text, successMessage);
+    }
   };
 
   interface Step {
@@ -73,8 +117,7 @@ export const InstallGuidePage = () => {
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
         break;
       case 2:
-        navigator.clipboard.writeText('chrome://extensions');
-        showToast('📋 COPIED "chrome://extensions" TO CLIPBOARD!');
+        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD!');
         try {
           window.open('chrome://extensions', '_blank');
         } catch (e) {
@@ -82,12 +125,10 @@ export const InstallGuidePage = () => {
         }
         break;
       case 3:
-        navigator.clipboard.writeText('In chrome://extensions, toggle on the "Developer mode" switch in the top-right corner.');
-        showToast('📋 COPIED DEVELOPER MODE INSTRUCTION!');
+        copyText('In chrome://extensions, toggle on the "Developer mode" switch in the top-right corner.', '📋 COPIED DEVELOPER MODE INSTRUCTION!');
         break;
       case 4:
-        navigator.clipboard.writeText('extension/dist');
-        showToast('📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
+        copyText('extension/dist', '📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
         break;
       case 5:
         window.open('https://wordleunlimited.org/', '_blank');
@@ -291,7 +332,10 @@ export const InstallGuidePage = () => {
                       href={step.link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()} // Prevent double firing click handler
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCardClick(step.id);
+                      }}
                       style={{
                         display: 'inline-block',
                         backgroundColor: 'var(--accent-green)',
