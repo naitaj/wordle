@@ -106,22 +106,19 @@ function simulateKeyPress(key: string): void {
     cancelable: true,
   };
 
-  // Dispatch keydown
+  // Dispatch keydown (bubbles naturally to window)
   const keydownEvent = new KeyboardEvent('keydown', eventInit);
   document.dispatchEvent(keydownEvent);
-  window.dispatchEvent(keydownEvent);
 
   // Dispatch keypress (only for printable/Enter keys)
   if (!isBackspace) {
     const keypressEvent = new KeyboardEvent('keypress', eventInit);
     document.dispatchEvent(keypressEvent);
-    window.dispatchEvent(keypressEvent);
   }
 
   // Dispatch keyup
   const keyupEvent = new KeyboardEvent('keyup', eventInit);
   document.dispatchEvent(keyupEvent);
-  window.dispatchEvent(keyupEvent);
 }
 
 async function typeWord(word: string, delay: number): Promise<void> {
