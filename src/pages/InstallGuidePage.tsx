@@ -233,7 +233,7 @@ export const InstallGuidePage = () => {
           </div>
         </div>
 
-        {/* Progress Tracker (Full-Width Solid Opaque Banner) */}
+        {/* Progress Tracker (Clean Minimal Banner) */}
         <div style={{
           position: 'sticky',
           top: '64px',
@@ -242,17 +242,15 @@ export const InstallGuidePage = () => {
           background: '#ffffff',
           opacity: 1,
           isolation: 'isolate',
-          padding: '16px 0',
+          padding: '16px 0 20px 0',
           borderBottom: '1px solid var(--border-primary)',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.06)',
           marginBottom: '48px'
         }}>
           <div style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid var(--border-primary)',
-            borderRadius: '16px',
-            padding: '20px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 24px'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
               {steps.map((step) => (
