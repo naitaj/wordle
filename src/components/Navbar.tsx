@@ -60,6 +60,7 @@ export function Navbar() {
             <span style={{
               fontFamily: '"Roboto Condensed", sans-serif',
               fontSize: '12px',
+              fontWeight: 700,
               color: 'var(--text-muted)',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
