@@ -1,13 +1,56 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export const InstallGuidePage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
-  const [isStep2Expanded, setIsStep2Expanded] = useState(false);
-  const [isStep3Expanded, setIsStep3Expanded] = useState(false);
+  const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
+
+  const toggleStepExpanded = (stepId: number) => {
+    setExpandedSteps(prev => ({ ...prev, [stepId]: !prev[stepId] }));
+  };
+
+  const stepInstructions: Record<number, ReactNode> = {
+    1: (
+      <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <li>CLICK THIS CARD TO DOWNLOAD THE EXTENSION <code>ZIP</code> FILE DIRECTLY.</li>
+        <li>LOCATE THE DOWNLOADED FILE (<code>wordle-main.zip</code>) IN YOUR DOWNLOADS FOLDER.</li>
+        <li>RIGHT-CLICK THE FILE AND SELECT <strong>"EXTRACT ALL..."</strong> TO UNZIP IT.</li>
+      </ol>
+    ),
+    2: (
+      <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <li>OPEN A NEW BROWSER TAB (<code>Ctrl + T</code> OR <code>Cmd + T</code>).</li>
+        <li>PASTE THE COPIED ADDRESS (<code>chrome://extensions</code>) AND PRESS <strong>ENTER</strong>.</li>
+        <li>OR GO TO CHROME MENU (<strong>⋮</strong>) → <strong>EXTENSIONS</strong> → <strong>MANAGE EXTENSIONS</strong>.</li>
+      </ol>
+    ),
+    3: (
+      <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <li>LOOK AT THE TOP-RIGHT CORNER OF THE CHROME EXTENSIONS PAGE.</li>
+        <li>FIND THE TOGGLE SWITCH LABELED <strong>"DEVELOPER MODE"</strong>.</li>
+        <li>CLICK THE TOGGLE SWITCH TO TURN IT <strong>ON</strong>.</li>
+        <li>A SUB-TOOLBAR WILL APPEAR WITH BUTTONS LIKE <em>"LOAD UNPACKED"</em>.</li>
+      </ol>
+    ),
+    4: (
+      <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <li>CLICK THE <strong>"LOAD UNPACKED"</strong> BUTTON IN THE TOP-LEFT OF THE EXTENSIONS PAGE.</li>
+        <li>BROWSE TO YOUR EXTRACTED DOWNLOAD FOLDER.</li>
+        <li>SELECT THE <strong>"extension/dist"</strong> SUBFOLDER AND CLICK <strong>"SELECT FOLDER"</strong>.</li>
+        <li>THE QUICK WORDLE SOLVER EXTENSION ICON WILL APPEAR IN YOUR TOOLBAR!</li>
+      </ol>
+    ),
+    5: (
+      <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <li>NAVIGATE TO <strong>WORDLE UNLIMITED</strong> OR <strong>NYT WORDLE</strong>.</li>
+        <li>CLICK THE FLOATING SOLVER BADGE ON THE PAGE.</li>
+        <li>GET INSTANT WORD RECOMMENDATIONS, GREEN/YELLOW FILTERING, AND AUTO-SOLVING!</li>
+      </ol>
+    )
+  };
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -112,16 +155,15 @@ export const InstallGuidePage = () => {
   ];
 
   const handleCardClick = (stepId: number) => {
+    toggleStepExpanded(stepId);
     switch (stepId) {
       case 1:
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
         break;
       case 2:
         copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD!');
-        setIsStep2Expanded(prev => !prev);
         break;
       case 3:
-        setIsStep3Expanded(prev => !prev);
         break;
       case 4:
         copyText('extension/dist', '📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
@@ -291,9 +333,42 @@ export const InstallGuidePage = () => {
                 {step.id}
               </div>
               <div style={{ flex: 1, width: '100%' }}>
-                <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: '0 0 16px 0', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                  {step.title}
-                </h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', width: '100%', marginBottom: '16px' }}>
+                  <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                    {step.title}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleStepExpanded(step.id);
+                    }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      backgroundColor: expandedSteps[step.id] ? 'var(--accent-green)' : 'var(--bg-secondary)',
+                      color: expandedSteps[step.id] ? '#ffffff' : 'var(--accent-green)',
+                      border: '1.5px solid var(--accent-green)',
+                      fontFamily: '"Roboto Condensed", sans-serif',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: expandedSteps[step.id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    {expandedSteps[step.id] ? 'COLLAPSE' : 'INSTRUCTIONS'}
+                  </button>
+                </div>
+
                 <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: 1.6, margin: '0 0 24px 0', whiteSpace: 'pre-line' }}>
                   {step.desc}
                 </p>
@@ -359,34 +434,7 @@ export const InstallGuidePage = () => {
                   )
                 )}
 
-                {step.id === 2 && isStep2Expanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      marginTop: '20px',
-                      padding: '20px',
-                      backgroundColor: 'var(--bg-secondary)',
-                      borderLeft: '4px solid var(--accent-green)',
-                      borderRadius: '8px',
-                      fontSize: '15px',
-                      lineHeight: '1.7',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', color: 'var(--accent-green)', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', letterSpacing: '1px' }}>
-                      HOW TO OPEN:
-                    </div>
-                    <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <li>OPEN A NEW TAB (<code>Ctrl + T</code> OR <code>Cmd + T</code>).</li>
-                      <li>PASTE THE COPIED ADDRESS AND PRESS <strong>ENTER</strong>.</li>
-                      <li>OR GO TO CHROME MENU (<strong>⋮</strong>) → <strong>EXTENSIONS</strong> → <strong>MANAGE EXTENSIONS</strong>.</li>
-                    </ol>
-                  </motion.div>
-                )}
-
-                 {step.id === 3 && isStep3Expanded && (
+                {expandedSteps[step.id] && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
@@ -405,12 +453,7 @@ export const InstallGuidePage = () => {
                     <div style={{ fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', color: 'var(--accent-green)', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', letterSpacing: '1px' }}>
                       INSTRUCTIONS:
                     </div>
-                    <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <li>LOOK AT THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.</li>
-                      <li>FIND THE TOGGLE SWITCH LABELED <strong>"DEVELOPER MODE"</strong>.</li>
-                      <li>CLICK THE TOGGLE SWITCH TO TURN IT <strong>ON</strong>.</li>
-                      <li>A NEW SUB-TOOLBAR WILL APPEAR WITH BUTTONS LIKE <em>"LOAD UNPACKED"</em>.</li>
-                    </ol>
+                    {stepInstructions[step.id]}
                   </motion.div>
                 )}
 
@@ -430,12 +473,7 @@ export const InstallGuidePage = () => {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    {step.id === 2
-                      ? (isStep2Expanded ? 'COLLAPSE INSTRUCTIONS' : 'VIEW INSTRUCTIONS')
-                      : step.id === 3 
-                      ? (isStep3Expanded ? 'COLLAPSE DETAILED INSTRUCTIONS' : 'VIEW DETAILED INSTRUCTIONS') 
-                      : step.actionLabel
-                    }
+                    {step.actionLabel}
                   </div>
                 )}
               </div>
