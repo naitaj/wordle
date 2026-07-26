@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const sectionVariants = {
@@ -13,6 +14,237 @@ const sectionVariants = {
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+};
+
+// Demo simulation data: each guess has a word and tile colors
+const DEMO_GUESSES = [
+  { word: 'CRANE', colors: ['absent', 'absent', 'present', 'absent', 'correct'] },
+  { word: 'STALE', colors: ['correct', 'absent', 'present', 'absent', 'correct'] },
+  { word: 'SHAPE', colors: ['correct', 'correct', 'correct', 'absent', 'correct'] },
+  { word: 'SHADE', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
+];
+
+const DEMO_STATS = [
+  { guess: 'CRANE', entropy: '5.74', wordsLeft: '2309' },
+  { guess: 'STALE', entropy: '4.12', wordsLeft: '84' },
+  { guess: 'SHAPE', entropy: '2.58', wordsLeft: '6' },
+  { guess: 'SHADE', entropy: '0.00', wordsLeft: '1' },
+];
+
+const COLOR_MAP: Record<string, string> = {
+  correct: '#538d4e',
+  present: '#b59f3b',
+  absent: '#3a3a3c',
+  empty: 'transparent',
+};
+
+const TYPING_DELAY = 120;    // ms per letter typed
+const FLIP_DELAY = 250;      // ms between each tile flip
+const FLIP_DURATION = 500;   // ms for one tile flip
+const PAUSE_AFTER_ROW = 600; // ms pause after a row is revealed
+const PAUSE_AFTER_WIN = 3000; // ms pause before replay
+
+const WordleDemo = () => {
+  // Board state: 6 rows x 5 cols, each tile has { letter, color, revealed }
+  const emptyBoard = () =>
+    Array.from({ length: 6 }, () =>
+      Array.from({ length: 5 }, () => ({ letter: '', color: 'empty' as string, revealed: false }))
+    );
+
+  const [board, setBoard] = useState(emptyBoard());
+  const [currentStats, setCurrentStats] = useState({ guess: '—', entropy: '—', wordsLeft: '2309' });
+  const [solvedMsg, setSolvedMsg] = useState(false);
+  const [demoKey, setDemoKey] = useState(0);
+
+  const runDemo = useCallback(async () => {
+    setSolvedMsg(false);
+    const newBoard = emptyBoard();
+    setBoard([...newBoard]);
+    setCurrentStats({ guess: '—', entropy: '—', wordsLeft: '2309' });
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    await sleep(800); // initial pause
+
+    for (let row = 0; row < DEMO_GUESSES.length; row++) {
+      const { word, colors } = DEMO_GUESSES[row];
+      const stats = DEMO_STATS[row];
+
+      // Update sidebar to show current best guess before typing
+      setCurrentStats({ guess: stats.guess, entropy: stats.entropy, wordsLeft: row === 0 ? '2309' : DEMO_STATS[row - 1].wordsLeft });
+
+      // Type letters one by one
+      for (let col = 0; col < 5; col++) {
+        newBoard[row][col] = { letter: word[col], color: 'empty', revealed: false };
+        setBoard(newBoard.map((r) => [...r]));
+        await sleep(TYPING_DELAY);
+      }
+
+      await sleep(300); // brief pause before flipping
+
+      // Flip tiles one by one
+      for (let col = 0; col < 5; col++) {
+        newBoard[row][col] = { letter: word[col], color: colors[col], revealed: true };
+        setBoard(newBoard.map((r) => [...r]));
+        await sleep(FLIP_DELAY);
+      }
+
+      // Update sidebar words left after reveal
+      setCurrentStats({ guess: stats.guess, entropy: stats.entropy, wordsLeft: stats.wordsLeft });
+
+      await sleep(PAUSE_AFTER_ROW);
+    }
+
+    // Show solved message
+    setSolvedMsg(true);
+    await sleep(PAUSE_AFTER_WIN);
+
+    // Restart
+    setDemoKey((k) => k + 1);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await runDemo();
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [demoKey, runDemo]);
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'center', alignItems: 'flex-start', width: '100%' }}>
+
+      {/* Wordle Board */}
+      <div style={{ display: 'grid', gridTemplateRows: 'repeat(6, 1fr)', gap: '6px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-primary)' }}>
+        {board.map((row, rowIdx) => (
+          <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
+            {row.map((tile, colIdx) => {
+              const bgColor = tile.revealed ? COLOR_MAP[tile.color] : 'transparent';
+              const borderColor = tile.letter && !tile.revealed ? '#565758' : tile.revealed ? COLOR_MAP[tile.color] : '#3a3a3c';
+
+              return (
+                <motion.div
+                  key={`${rowIdx}-${colIdx}-${demoKey}`}
+                  animate={
+                    tile.revealed
+                      ? { rotateX: [0, 90, 0], backgroundColor: bgColor, borderColor }
+                      : tile.letter
+                      ? { scale: [1, 1.1, 1], borderColor }
+                      : {}
+                  }
+                  transition={
+                    tile.revealed
+                      ? { duration: FLIP_DURATION / 1000, ease: 'easeInOut' }
+                      : tile.letter
+                      ? { duration: 0.1 }
+                      : {}
+                  }
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    border: `2px solid ${borderColor}`,
+                    backgroundColor: bgColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '28px',
+                    fontFamily: '"Inter", sans-serif',
+                    fontWeight: 'bold',
+                    color: tile.letter ? '#fff' : 'var(--text-primary)',
+                    textTransform: 'uppercase',
+                    borderRadius: '4px',
+                  }}
+                >
+                  {tile.letter}
+                </motion.div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Sidebar Stats */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: '12px',
+          padding: '28px',
+          minWidth: '260px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          position: 'relative',
+        }}
+      >
+        <div>
+          <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Best Guess</div>
+          <motion.div
+            key={currentStats.guess}
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', color: 'var(--text-primary)', letterSpacing: '0.05em' }}
+          >
+            {currentStats.guess}
+          </motion.div>
+        </div>
+        <div style={{ width: '100%', height: '1px', backgroundColor: 'var(--border-primary)' }} />
+        <div>
+          <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Entropy</div>
+          <motion.div
+            key={currentStats.entropy}
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '24px', color: 'var(--accent-amber)', letterSpacing: '0.05em' }}
+          >
+            {currentStats.entropy === '—' ? '—' : `${currentStats.entropy} BITS`}
+          </motion.div>
+        </div>
+        <div>
+          <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Words Left</div>
+          <motion.div
+            key={currentStats.wordsLeft}
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '24px', color: 'var(--text-primary)', letterSpacing: '0.05em' }}
+          >
+            {currentStats.wordsLeft}
+          </motion.div>
+        </div>
+
+        <AnimatePresence>
+          {solvedMsg && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              style={{
+                marginTop: '8px',
+                padding: '12px 16px',
+                backgroundColor: 'rgba(83, 141, 78, 0.15)',
+                border: '1px solid #538d4e',
+                borderRadius: '8px',
+                textAlign: 'center',
+                fontFamily: '"Bebas Neue", sans-serif',
+                fontSize: '20px',
+                color: '#538d4e',
+                letterSpacing: '0.1em',
+              }}
+            >
+              ✓ SOLVED IN 4 GUESSES
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
 };
 
 export const HomePage = () => {
@@ -135,63 +367,7 @@ export const HomePage = () => {
             </h2>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-            
-            {/* Wordle Board Mock */}
-            <div style={{ display: 'grid', gridTemplateRows: 'repeat(6, 1fr)', gap: '8px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-primary)' }}>
-              {Array.from({ length: 6 }).map((_, rowIdx) => (
-                <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-                  {Array.from({ length: 5 }).map((_, colIdx) => {
-                    const isFirstRow = rowIdx === 0;
-                    const word = "CRANE";
-                    const colors = ['#3a3a3c', '#b59f3b', '#538d4e', '#b59f3b', '#3a3a3c'];
-                    
-                    return (
-                      <motion.div 
-                        key={colIdx}
-                        initial={isFirstRow ? { rotateX: 0, backgroundColor: 'transparent' } : false}
-                        animate={isFirstRow ? { 
-                          rotateX: [0, 90, 0], 
-                          backgroundColor: ['transparent', colors[colIdx], colors[colIdx]],
-                          borderColor: ['#3a3a3c', colors[colIdx], colors[colIdx]]
-                        } : {}}
-                        transition={isFirstRow ? { delay: colIdx * 0.2 + 1, duration: 0.6 } : {}}
-                        style={{
-                          width: '50px', height: '50px', border: '2px solid #3a3a3c', display: 'flex',
-                          alignItems: 'center', justifyContent: 'center', fontSize: '28px',
-                          fontFamily: 'sans-serif', fontWeight: 'bold', color: isFirstRow ? '#fff' : 'var(--text-primary)',
-                          textTransform: 'uppercase'
-                        }}
-                      >
-                        {isFirstRow ? word[colIdx] : ""}
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-
-            {/* Sidebar Mock */}
-            <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '24px',
-              minWidth: '250px', display: 'flex', flexDirection: 'column', gap: '16px'
-            }}>
-              <div>
-                <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--text-secondary)', fontSize: '14px', textTransform: 'uppercase', marginBottom: '4px' }}>Best Guess</div>
-                <div style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', color: 'var(--text-primary)' }}>CRANE</div>
-              </div>
-              <div style={{ width: '100%', height: '1px', backgroundColor: 'var(--border-primary)' }} />
-              <div>
-                <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--text-secondary)', fontSize: '14px', textTransform: 'uppercase', marginBottom: '4px' }}>Entropy</div>
-                <div style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '24px', color: 'var(--accent-amber)', letterSpacing: '0.05em' }}>5.74 BITS</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--text-secondary)', fontSize: '14px', textTransform: 'uppercase', marginBottom: '4px' }}>Words Left</div>
-                <div style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '24px', color: 'var(--text-primary)', letterSpacing: '0.05em' }}>2309</div>
-              </div>
-            </motion.div>
-
-          </div>
+          <WordleDemo />
         </motion.section>
 
         {/* SUPPORTED WEBSITES SECTION */}
