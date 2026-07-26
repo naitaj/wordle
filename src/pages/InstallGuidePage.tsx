@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 export const InstallGuidePage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [isStep2Expanded, setIsStep2Expanded] = useState(false);
   const [isStep3Expanded, setIsStep3Expanded] = useState(false);
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -84,9 +85,9 @@ export const InstallGuidePage = () => {
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: "Chrome security prohibits websites from launching chrome:// links directly. Click anywhere on this card to copy 'chrome://extensions' to your clipboard.",
+      desc: 'CLICK THIS CARD TO COPY "chrome://extensions" AND VIEW INSTRUCTIONS ON HOW TO OPEN IT IN CHROME.',
       code: 'chrome://extensions',
-      actionLabel: 'CLICK TO COPY "chrome://extensions"'
+      actionLabel: 'COPY URL & VIEW INSTRUCTIONS'
     },
     {
       id: 3,
@@ -116,7 +117,8 @@ export const InstallGuidePage = () => {
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
         break;
       case 2:
-        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD! Open a new tab (Ctrl+T) and paste.');
+        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD!');
+        setIsStep2Expanded(prev => !prev);
         break;
       case 3:
         setIsStep3Expanded(prev => !prev);
@@ -357,19 +359,32 @@ export const InstallGuidePage = () => {
                   )
                 )}
 
-                {step.id === 2 && (
-                  <div style={{
-                    marginTop: '16px',
-                    padding: '12px 16px',
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    color: 'var(--text-secondary)',
-                    lineHeight: '1.5'
-                  }}>
-                    🔒 <strong>Chrome Security Note:</strong> Web browsers block all external sites from opening <code>chrome://</code> pages automatically. Click this card to copy the link, then press <code>Ctrl+T</code> (or <code>Cmd+T</code>) to open a new tab and paste it. Alternatively, click Chrome Menu (<strong>⋮</strong>) → <strong>Extensions</strong> → <strong>Manage Extensions</strong>.
-                  </div>
+                {step.id === 2 && isStep2Expanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      marginTop: '20px',
+                      padding: '20px',
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderLeft: '4px solid var(--accent-green)',
+                      borderRadius: '8px',
+                      fontSize: '15px',
+                      lineHeight: '1.7',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', color: 'var(--accent-green)', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', letterSpacing: '1px' }}>
+                      INSTRUCTIONS TO OPEN:
+                    </div>
+                    <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <li>THIS CARD AUTOMATICALLY COPIED <strong>"chrome://extensions"</strong> TO YOUR CLIPBOARD.</li>
+                      <li>OPEN A NEW BROWSER TAB BY PRESSING <code>Ctrl + T</code> (OR <code>Cmd + T</code> ON MAC).</li>
+                      <li>PASTE <strong>"chrome://extensions"</strong> INTO THE ADDRESS BAR AND PRESS <strong>ENTER</strong>.</li>
+                      <li>OR CLICK CHROME MENU (<strong>⋮</strong>) → <strong>EXTENSIONS</strong> → <strong>MANAGE EXTENSIONS</strong>.</li>
+                    </ol>
+                  </motion.div>
                 )}
 
                  {step.id === 3 && isStep3Expanded && (
@@ -416,7 +431,9 @@ export const InstallGuidePage = () => {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    {step.id === 3 
+                    {step.id === 2
+                      ? (isStep2Expanded ? 'COLLAPSE INSTRUCTIONS' : 'COPY URL & VIEW INSTRUCTIONS')
+                      : step.id === 3 
                       ? (isStep3Expanded ? 'COLLAPSE DETAILED INSTRUCTIONS' : 'VIEW DETAILED INSTRUCTIONS') 
                       : step.actionLabel
                     }
