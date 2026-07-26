@@ -369,6 +369,24 @@ export const HomePage = () => {
           </motion.div>
         </motion.section>
 
+        {/* INTERACTIVE DEMO SECTION */}
+        <motion.section 
+          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
+          variants={sectionVariants}
+          style={{ marginBottom: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
+              DEMO
+            </div>
+            <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '48px', margin: '0', textTransform: 'uppercase' }}>
+              WATCH IT SOLVE
+            </h2>
+          </div>
+
+          <WordleDemo />
+        </motion.section>
+
         {/* FEATURES SECTION */}
         <motion.section 
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
@@ -388,10 +406,10 @@ export const HomePage = () => {
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px'
           }}>
             {[
-              { title: 'ENTROPY-BASED SOLVER', desc: 'Uses Shannon entropy to score every possible guess', icon: 'M12 2v20m10-10H2' },
-              { title: 'MAXIMUM INFORMATION GUESSES', desc: 'Each guess maximizes the information you gain', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
               { title: 'OFFICIAL NYT WORDLE SUPPORT', desc: 'Full compatibility with the official New York Times game', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
               { title: '11+ SUPPORTED WORDLE CLONES', desc: 'Full compatibility with Quordle, Octordle, Dordle, Sedecordle, Hurdle, Absurdle & more', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
+              { title: 'ENTROPY-BASED SOLVER', desc: 'Uses Shannon entropy to score every possible guess', icon: 'M12 2v20m10-10H2' },
+              { title: 'MAXIMUM INFORMATION GUESSES', desc: 'Each guess maximizes the information you gain', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
               { title: 'ONE-CLICK START', desc: 'Press Start and the solver handles everything', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
               { title: 'LIGHTWEIGHT EXTENSION', desc: 'Minimal footprint, no bloat', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
               { title: 'FAST SOLVER', desc: 'Entropy calculations complete in milliseconds', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -413,24 +431,6 @@ export const HomePage = () => {
               </motion.div>
             ))}
           </div>
-        </motion.section>
-
-        {/* INTERACTIVE DEMO SECTION */}
-        <motion.section 
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
-          variants={sectionVariants}
-          style={{ marginBottom: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
-              DEMO
-            </div>
-            <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '48px', margin: '0', textTransform: 'uppercase' }}>
-              WATCH IT SOLVE
-            </h2>
-          </div>
-
-          <WordleDemo />
         </motion.section>
 
         {/* SUPPORTED WEBSITES SECTION */}

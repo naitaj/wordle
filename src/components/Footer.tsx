@@ -71,12 +71,35 @@ export function Footer() {
               <a href="https://github.com/naitaj/wordle" target="_blank" rel="noopener noreferrer" style={{
                 color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
               }}>GitHub</a>
-              <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" style={{
-                color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
-              }}>NYT Wordle</a>
-              <a href="https://wordleunlimited.org/" target="_blank" rel="noopener noreferrer" style={{
-                color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
-              }}>wordleunlimited.org</a>
+            </div>
+          </div>
+
+          <div>
+            <h4 style={{
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontSize: '14px',
+              letterSpacing: '0.15em',
+              color: 'var(--text-muted)',
+              marginBottom: '12px',
+            }}>SUPPORTED WEBSITES</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[
+                { label: 'NYT Wordle', url: 'https://www.nytimes.com/games/wordle/index.html' },
+                { label: 'Wordle Unlimited', url: 'https://wordleunlimited.org/' },
+                { label: 'Hello Wordl', url: 'https://hellowordl.net/' },
+                { label: 'Quordle', url: 'https://www.merriam-webster.com/games/quordle/' },
+                { label: 'Octordle', url: 'https://octordle.com/' },
+                { label: 'Dordle', url: 'https://zaratustra.itch.io/dordle' },
+                { label: 'Sedecordle', url: 'https://www.sedecordle.com/' },
+                { label: 'Hurdle', url: 'https://hurdle.me/' },
+                { label: 'Absurdle', url: 'https://qntm.org/absurdle' },
+                { label: 'Evil Wordle', url: 'https://swag.github.io/evil-wordle/' },
+                { label: 'WordGuessr', url: 'https://wordguessr.com/' },
+              ].map(site => (
+                <a key={site.url} href={site.url} target="_blank" rel="noopener noreferrer" style={{
+                  color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
+                }}>{site.label}</a>
+              ))}
             </div>
           </div>
         </div>
