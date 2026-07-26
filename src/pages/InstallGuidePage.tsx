@@ -295,14 +295,19 @@ export const InstallGuidePage = () => {
                 display: 'flex',
                 gap: '32px',
                 backgroundColor: 'var(--bg-card)',
-                border: step.id === activeStep ? '1.5px solid var(--accent-green)' : '1px solid var(--border-primary)',
+                background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
+                border: step.id === activeStep ? '1.5px solid #15803d' : '1px solid #e4e4e7',
+                borderLeft: '5px solid #15803d',
                 borderRadius: '16px',
                 padding: '40px',
                 alignItems: 'flex-start',
                 cursor: step.id === 1 || step.id === 2 ? 'pointer' : 'default',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
-                color: 'inherit'
+                color: 'inherit',
+                boxShadow: step.id === activeStep 
+                  ? '0 12px 35px -5px rgba(21, 128, 61, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04)' 
+                  : '0 8px 30px -5px rgba(0, 0, 0, 0.05), 0 2px 8px -2px rgba(0, 0, 0, 0.02)'
               }}
               className="flex-col md:flex-row"
             >
@@ -310,20 +315,21 @@ export const InstallGuidePage = () => {
                 flexShrink: 0,
                 width: '64px',
                 height: '64px',
-                backgroundColor: 'var(--bg-secondary)',
-                color: 'var(--accent-green)',
+                background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)',
+                color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontFamily: '"Anton", sans-serif',
                 fontSize: '32px',
-                borderRadius: '12px'
+                borderRadius: '14px',
+                boxShadow: '0 6px 16px rgba(21, 128, 61, 0.28)'
               }}>
                 {step.id}
               </div>
               <div style={{ flex: 1, width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', width: '100%', marginBottom: '16px' }}>
-                  <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                  <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '32px', margin: 0, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
                     {step.title}
                   </h3>
                   <button
@@ -337,9 +343,9 @@ export const InstallGuidePage = () => {
                       flexShrink: 0,
                       padding: '6px 14px',
                       borderRadius: '20px',
-                      backgroundColor: expandedSteps[step.id] ? 'var(--accent-green)' : 'var(--bg-secondary)',
-                      color: expandedSteps[step.id] ? '#ffffff' : 'var(--accent-green)',
-                      border: '1.5px solid var(--accent-green)',
+                      backgroundColor: expandedSteps[step.id] ? '#15803d' : 'rgba(21, 128, 61, 0.08)',
+                      color: expandedSteps[step.id] ? '#ffffff' : '#15803d',
+                      border: '1.5px solid #15803d',
                       fontFamily: '"Roboto Condensed", sans-serif',
                       fontSize: '12px',
                       fontWeight: 700,
@@ -349,7 +355,8 @@ export const InstallGuidePage = () => {
                       transition: 'all 0.2s ease',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '6px',
+                      boxShadow: expandedSteps[step.id] ? '0 4px 12px rgba(21, 128, 61, 0.25)' : 'none'
                     }}
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: expandedSteps[step.id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
@@ -381,16 +388,17 @@ export const InstallGuidePage = () => {
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '8px',
-                        color: 'var(--accent-amber)',
-                        fontFamily: 'monospace',
+                        color: '#38bdf8',
+                        fontFamily: 'Consolas, Monaco, monospace',
                         fontSize: '14px',
-                        textDecoration: 'underline',
+                        textDecoration: 'none',
                         padding: '14px 18px',
-                        backgroundColor: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-primary)',
-                        borderRadius: '8px',
+                        backgroundColor: '#0f172a',
+                        border: '1px solid #1e293b',
+                        borderRadius: '10px',
                         wordBreak: 'break-all',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                       }}
                     >
                       🔗 https://www.nytimes.com/games/wordle/index.html ↗
@@ -404,16 +412,17 @@ export const InstallGuidePage = () => {
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '8px',
-                        color: 'var(--accent-amber)',
-                        fontFamily: 'monospace',
+                        color: '#38bdf8',
+                        fontFamily: 'Consolas, Monaco, monospace',
                         fontSize: '14px',
-                        textDecoration: 'underline',
+                        textDecoration: 'none',
                         padding: '14px 18px',
-                        backgroundColor: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-primary)',
-                        borderRadius: '8px',
+                        backgroundColor: '#0f172a',
+                        border: '1px solid #1e293b',
+                        borderRadius: '10px',
                         wordBreak: 'break-all',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                       }}
                     >
                       🔗 https://wordleunlimited.org/ ↗
@@ -421,15 +430,16 @@ export const InstallGuidePage = () => {
                   </div>
                 ) : step.code && (
                   <pre style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
+                    backgroundColor: '#0f172a',
+                    border: '1px solid #1e293b',
                     padding: '20px',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     overflowX: 'auto',
                     margin: 0,
-                    color: 'var(--accent-amber)',
-                    fontFamily: 'monospace',
-                    fontSize: '14px'
+                    color: '#4ade80',
+                    fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                    fontSize: '14px',
+                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3)'
                   }}>
                     {step.code}
                   </pre>
