@@ -233,43 +233,50 @@ export const InstallGuidePage = () => {
           </div>
         </div>
 
-        {/* Progress Tracker */}
+        {/* Progress Tracker (Full-Width Solid Opaque Banner) */}
         <div style={{
           position: 'sticky',
-          top: '90px',
-          zIndex: 50,
+          top: '64px',
+          zIndex: 80,
           backgroundColor: '#ffffff',
           background: '#ffffff',
           opacity: 1,
           isolation: 'isolate',
-          boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
-          padding: '20px',
-          border: '1px solid var(--border-primary)',
-          borderRadius: '16px',
+          padding: '16px 0',
+          borderBottom: '1px solid var(--border-primary)',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
           marginBottom: '48px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-            {steps.map((step) => (
-              <div 
-                key={step.id} 
-                onClick={() => {
-                  stepRefs.current[step.id - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  handleCardClick(step.id);
-                }}
-                title={`Go to Step ${step.id}: ${step.title}`}
-                style={{
-                  flex: 1,
-                  height: '8px',
-                  backgroundColor: activeStep >= step.id ? 'var(--accent-green)' : 'var(--border-primary)',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  borderRadius: '4px'
-                }} 
-              />
-            ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-            STEP {activeStep} OF {steps.length} — {steps[activeStep - 1]?.title}
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid var(--border-primary)',
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+              {steps.map((step) => (
+                <div 
+                  key={step.id} 
+                  onClick={() => {
+                    stepRefs.current[step.id - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    handleCardClick(step.id);
+                  }}
+                  title={`Go to Step ${step.id}: ${step.title}`}
+                  style={{
+                    flex: 1,
+                    height: '8px',
+                    backgroundColor: activeStep >= step.id ? 'var(--accent-green)' : 'var(--border-primary)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    borderRadius: '4px'
+                  }} 
+                />
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              STEP {activeStep} OF {steps.length} — {steps[activeStep - 1]?.title}
+            </div>
           </div>
         </div>
 
