@@ -69,6 +69,7 @@ function startAssistLoop(initialRow: number): void {
 
 // ─── Floating Status Badge Widget ───
 
+let hostElement: HTMLElement | null = null;
 let shadowRootRef: ShadowRoot | null = null;
 
 function getShadowElement(id: string): HTMLElement | null {
@@ -98,11 +99,14 @@ function updateBadgeModeIndicator(): void {
 }
 
 function createStatusBadge(): HTMLElement {
-  const existing = document.getElementById('wordle-solver-host');
-  if (existing) existing.remove();
+  if (hostElement) {
+    hostElement.remove();
+    hostElement = null;
+  }
 
-  const host = document.createElement('div');
-  host.id = 'wordle-solver-host';
+  const randomTag = 'w-solver-' + Math.random().toString(36).substring(2, 8);
+  const host = document.createElement(randomTag);
+  hostElement = host;
   document.body.appendChild(host);
 
   const shadowRoot = host.attachShadow({ mode: 'open' });

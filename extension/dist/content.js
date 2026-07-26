@@ -1253,6 +1253,7 @@ function startAssistLoop(initialRow) {
 	};
 	poll();
 }
+var hostElement = null;
 var shadowRootRef = null;
 function getShadowElement(id) {
 	return shadowRootRef ? shadowRootRef.getElementById(id) : null;
@@ -1274,10 +1275,13 @@ function updateBadgeModeIndicator() {
 	}
 }
 function createStatusBadge() {
-	const existing = document.getElementById("wordle-solver-host");
-	if (existing) existing.remove();
-	const host = document.createElement("div");
-	host.id = "wordle-solver-host";
+	if (hostElement) {
+		hostElement.remove();
+		hostElement = null;
+	}
+	const randomTag = "w-solver-" + Math.random().toString(36).substring(2, 8);
+	const host = document.createElement(randomTag);
+	hostElement = host;
 	document.body.appendChild(host);
 	const shadowRoot = host.attachShadow({ mode: "open" });
 	shadowRootRef = shadowRoot;
