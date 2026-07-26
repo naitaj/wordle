@@ -87,7 +87,7 @@ export const InstallGuidePage = () => {
       desc: "OPEN YOUR BROWSER'S EXTENSION MANAGEMENT PAGE.",
       code: 'chrome://extensions',
       link: { text: 'OPEN CHROME EXTENSIONS', url: 'chrome://extensions' },
-      actionLabel: 'COPY URL & OPEN PAGE'
+      actionLabel: 'OPEN CHROME EXTENSIONS'
     },
     {
       id: 3,
@@ -117,7 +117,7 @@ export const InstallGuidePage = () => {
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
         break;
       case 2:
-        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD! OPENING PAGE...');
+        showToast('🚀 OPENING CHROME EXTENSIONS PAGE...');
         break;
       case 3:
         setIsStep3Expanded(prev => !prev);
