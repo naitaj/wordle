@@ -215,7 +215,7 @@ export const HomePage = () => {
               textAlign: 'left'
             }}>
               <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>CLASSIC WORDLE</span>
-              <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '28px', margin: '4px 0 8px 0', letterSpacing: '0.05em' }}>NYT WORDLE & UNLIMITED</h3>
+              <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '28px', margin: '4px 0 8px 0', letterSpacing: '0.05em' }}>NYT WORDLE & WORDLE UNLIMITED</h3>
               <p style={{ fontFamily: '"Inter", sans-serif', color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.6' }}>
                 Full support for official NYT Wordle, Wordle Unlimited, and Hello Wordl. Evaluates entropy in real-time alongside standard 5-letter game boards.
               </p>
