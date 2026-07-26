@@ -210,12 +210,12 @@ export const HomePage = () => {
             </h2>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px' }}>
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '28px',
+              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
-              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.1em' }}>TIER 1 • CLASSIC</span>
+              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>CLASSIC WORDLE</span>
               <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '28px', margin: '4px 0 8px 0', letterSpacing: '0.05em' }}>NYT WORDLE & UNLIMITED</h3>
               <p style={{ fontFamily: '"Inter", sans-serif', color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.6' }}>
                 Full support for official NYT Wordle, Wordle Unlimited, and Hello Wordl. Evaluates entropy in real-time alongside standard 5-letter game boards.
@@ -223,10 +223,10 @@ export const HomePage = () => {
             </motion.div>
             
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '28px',
+              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
-              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.1em' }}>TIER 1 • MULTI-BOARD</span>
+              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>MULTI-BOARD GAMES</span>
               <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '28px', margin: '4px 0 8px 0', letterSpacing: '0.05em' }}>QUORDLE, OCTORDLE & SEDECORDLE</h3>
               <p style={{ fontFamily: '"Inter", sans-serif', color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.6' }}>
                 Simultaneous multi-grid solving for Dordle (2x), Quordle (4x), Octordle (8x), and Sedecordle (16x). Calculates combined Shannon entropy across all remaining active boards.
@@ -234,10 +234,10 @@ export const HomePage = () => {
             </motion.div>
 
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '28px',
+              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
-              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.1em' }}>TIER 1 • MULTI-ROUND</span>
+              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>MULTI-ROUND & SEQUENTIAL</span>
               <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '28px', margin: '4px 0 8px 0', letterSpacing: '0.05em' }}>HURDLE & KILORDLE</h3>
               <p style={{ fontFamily: '"Inter", sans-serif', color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.6' }}>
                 Multi-round transition tracking for Hurdle and sequential 1000-word progression for Kilordle with automatic solver state resetting between rounds.
@@ -245,10 +245,10 @@ export const HomePage = () => {
             </motion.div>
 
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '28px',
+              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
-              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.1em' }}>TIER 2 • ADVERSARIAL</span>
+              <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>ADVERSARIAL WORDLE</span>
               <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '28px', margin: '4px 0 8px 0', letterSpacing: '0.05em' }}>ABSURDLE, EVIL WORDLE & LINGLE</h3>
               <p style={{ fontFamily: '"Inter", sans-serif', color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.6' }}>
                 Handles adversarial feedback loops in Absurdle and Evil Wordle, continuously filtering live candidate spaces after adaptive tile responses.
