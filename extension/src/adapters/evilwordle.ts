@@ -12,7 +12,8 @@ export class EvilWordleAdapter implements GameAdapter {
   };
 
   detectGame(): boolean {
-    return window.location.hostname.includes('swag.github.io/evil-wordle') || window.location.hostname.includes('evil-wordle');
+    const loc = window.location.href;
+    return loc.includes('swag.github.io/evil-wordle') || loc.includes('evil-wordle');
   }
 
   readBoard(boardIndex: number = 0): BoardState {

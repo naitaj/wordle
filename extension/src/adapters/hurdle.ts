@@ -12,8 +12,8 @@ export class HurdleAdapter implements GameAdapter {
   };
 
   detectGame(): boolean {
-    const host = window.location.hostname;
-    return host.includes('arkadium.com/games/hurdle') || host.includes('hurdle');
+    const loc = window.location.href;
+    return loc.includes('arkadium.com/games/hurdle') || loc.includes('hurdle');
   }
 
   readBoard(boardIndex: number = 0): BoardState {

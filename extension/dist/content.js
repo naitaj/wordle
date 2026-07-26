@@ -693,8 +693,8 @@ var HurdleAdapter = class {
 		};
 	}
 	detectGame() {
-		const host = window.location.hostname;
-		return host.includes("arkadium.com/games/hurdle") || host.includes("hurdle");
+		const loc = window.location.href;
+		return loc.includes("arkadium.com/games/hurdle") || loc.includes("hurdle");
 	}
 	readBoard(boardIndex = 0) {
 		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
@@ -897,7 +897,8 @@ var EvilWordleAdapter = class {
 		};
 	}
 	detectGame() {
-		return window.location.hostname.includes("swag.github.io/evil-wordle") || window.location.hostname.includes("evil-wordle");
+		const loc = window.location.href;
+		return loc.includes("swag.github.io/evil-wordle") || loc.includes("evil-wordle");
 	}
 	readBoard(boardIndex = 0) {
 		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
