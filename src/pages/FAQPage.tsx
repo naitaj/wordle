@@ -20,8 +20,8 @@ const faqs = [
     answer: "The extension works on any Chromium-based browser, including Google Chrome, Microsoft Edge, and Brave. It does not work on Firefox or Safari because it uses Chrome Extension APIs (Manifest V3)."
   },
   {
-    question: "DOES IT WORK ON EVERY WORDLE CLONE?",
-    answer: "The extension is specifically built to work on two websites: the official New York Times Wordle (nytimes.com/games/wordle) and https://wordleunlimited.org/. Other Wordle clones may use different page structures that the extension cannot read."
+    question: "WHICH WORDLE CLONES AND VARIANTS ARE SUPPORTED?",
+    answer: "The extension features a modular Game Adapter system supporting 11+ popular Wordle variants! This includes single and multi-board games (NYT Wordle, Wordle Unlimited, Hello Wordl, Dordle 2-board, Quordle 4-board, Octordle 8-board, Sedecordle 16-board, Hurdle multi-round) as well as adversarial & sequential games (Absurdle, Evil Wordle, Kilordle 1000-boards, Lingle). Unrecognized Wordle clones gracefully display an Unsupported Site warning without interfering with your browser."
   },
   {
     question: "WHY DO I NEED DEVELOPER MODE?",
