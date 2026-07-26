@@ -233,48 +233,43 @@ export const InstallGuidePage = () => {
           </div>
         </div>
 
-        {/* Progress Tracker (Clean Minimal Banner) */}
+        {/* Progress Tracker (Curvy Solid Opaque Banner) */}
         <div style={{
           position: 'sticky',
-          top: '64px',
+          top: '76px',
           zIndex: 80,
           backgroundColor: '#ffffff',
           background: '#ffffff',
           opacity: 1,
           isolation: 'isolate',
-          padding: '16px 0 20px 0',
-          borderBottom: '1px solid var(--border-primary)',
-          boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.06)',
+          padding: '16px 24px',
+          border: '1px solid var(--border-primary)',
+          borderRadius: '24px',
+          boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)',
           marginBottom: '48px'
         }}>
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 24px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-              {steps.map((step) => (
-                <div 
-                  key={step.id} 
-                  onClick={() => {
-                    stepRefs.current[step.id - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    handleCardClick(step.id);
-                  }}
-                  title={`Go to Step ${step.id}: ${step.title}`}
-                  style={{
-                    flex: 1,
-                    height: '8px',
-                    backgroundColor: activeStep >= step.id ? 'var(--accent-green)' : 'var(--border-primary)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    borderRadius: '4px'
-                  }} 
-                />
-              ))}
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-              STEP {activeStep} OF {steps.length} — {steps[activeStep - 1]?.title}
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+            {steps.map((step) => (
+              <div 
+                key={step.id} 
+                onClick={() => {
+                  stepRefs.current[step.id - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  handleCardClick(step.id);
+                }}
+                title={`Go to Step ${step.id}: ${step.title}`}
+                style={{
+                  flex: 1,
+                  height: '8px',
+                  backgroundColor: activeStep >= step.id ? 'var(--accent-green)' : 'var(--border-primary)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  borderRadius: '4px'
+                }} 
+              />
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '12px', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+            STEP {activeStep} OF {steps.length} — {steps[activeStep - 1]?.title}
           </div>
         </div>
 
