@@ -356,18 +356,6 @@ export function Popup() {
             </div>
           )}
 
-          {/* Active Game Detected Banner */}
-          {gameInfo && (
-            <div className="px-3 py-2 bg-emerald-50 border-2 border-emerald-600 rounded-lg flex items-center justify-between text-black">
-              <span className="font-bebas text-sm tracking-wide flex items-center gap-1.5">
-                🎮 {gameInfo.name}
-              </span>
-              <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-emerald-600 text-white rounded">
-                {gameInfo.boardCount > 1 ? `${gameInfo.boardCount} Boards` : 'Single Board'}
-              </span>
-            </div>
-          )}
-
           {/* Mode Tabs */}
           <div className="flex border-2 border-black rounded-lg overflow-hidden bg-white w-full">
             <button
