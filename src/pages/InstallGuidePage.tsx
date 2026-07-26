@@ -85,7 +85,7 @@ export const InstallGuidePage = () => {
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: 'CLICK THIS CARD TO COPY "chrome://extensions" AND VIEW INSTRUCTIONS ON HOW TO OPEN IT IN CHROME.',
+      desc: 'CLICK TO COPY "chrome://extensions" ADDRESS AND PASTE IT IN A NEW TAB.',
       code: 'chrome://extensions',
       actionLabel: 'COPY URL & VIEW INSTRUCTIONS'
     },
