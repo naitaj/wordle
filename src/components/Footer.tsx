@@ -32,7 +32,7 @@ export function Footer() {
         </div>
 
         {/* Links */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '48px', flex: 1, marginLeft: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '48px', flex: 1, maxWidth: '800px', marginLeft: 'auto' }}>
           <div>
             <h4 style={{
               fontFamily: '"Bebas Neue", sans-serif',
