@@ -236,10 +236,13 @@ export const InstallGuidePage = () => {
         {/* Progress Tracker */}
         <div style={{
           position: 'sticky',
-          top: '80px',
-          zIndex: 40,
+          top: '90px',
+          zIndex: 50,
           backgroundColor: '#ffffff',
-          boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)',
+          background: '#ffffff',
+          opacity: 1,
+          isolation: 'isolate',
+          boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
           padding: '20px',
           border: '1px solid var(--border-primary)',
           borderRadius: '16px',
