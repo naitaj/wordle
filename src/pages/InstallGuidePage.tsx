@@ -130,27 +130,24 @@ export const InstallGuidePage = () => {
       title: 'OPEN CHROME EXTENSIONS',
       desc: 'CLICK THIS CARD TO COPY THE EXTENSIONS ADDRESS.',
       code: 'chrome://extensions',
-      actionLabel: 'VIEW INSTRUCTIONS'
+      actionLabel: 'COPY'
     },
     {
       id: 3,
       title: 'ENABLE DEVELOPER MODE',
-      desc: 'TOGGLE THE DEVELOPER MODE SWITCH IN THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.',
-      actionLabel: 'COPY TOGGLE INSTRUCTIONS'
+      desc: 'TOGGLE THE DEVELOPER MODE SWITCH IN THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.'
     },
     {
       id: 4,
       title: 'LOAD THE EXTENSION',
-      desc: 'CLICK "LOAD UNPACKED" AND SELECT THE "EXTENSION/DIST" FOLDER FROM THE EXTRACTED DIRECTORY.',
-      actionLabel: 'COPY FOLDER PATH "extension/dist"'
+      desc: 'CLICK "LOAD UNPACKED" AND SELECT THE "EXTENSION/DIST" FOLDER FROM THE EXTRACTED DIRECTORY.'
     },
     {
       id: 5,
       title: 'START SOLVING!',
       desc: 'NAVIGATE TO ONE OF THE SUPPORTED WEBSITES AND CLICK THE BADGE TO START THE SOLVER.',
       code: 'https://www.nytimes.com/games/wordle/index.html\nhttps://wordleunlimited.org/',
-      link: { text: 'CHECK INSTALLATION', url: '/check' },
-      actionLabel: 'LAUNCH GAME SITES'
+      link: { text: 'CHECK INSTALLATION', url: '/check' }
     },
   ];
 
@@ -162,16 +159,7 @@ export const InstallGuidePage = () => {
       case 2:
         copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD!');
         break;
-      case 3:
-        showToast('⚙️ FOLLOW INSTRUCTIONS TO ENABLE DEVELOPER MODE IN CHROME');
-        break;
-      case 4:
-        copyText('extension/dist', '📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
-        break;
-      case 5:
-        // Open NYT in a new tab, Wordle Unlimited opens via native href
-        window.open('https://www.nytimes.com/games/wordle/index.html', '_blank');
-        showToast('🎯 OPENED GAME SITES IN NEW TABS!');
+      default:
         break;
     }
   };
@@ -293,15 +281,16 @@ export const InstallGuidePage = () => {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.5, delay: 0.1 }}
               href={
-                step.id === 1 ? 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip' :
-                step.id === 5 ? 'https://wordleunlimited.org/' : undefined
+                step.id === 1 ? 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip' : undefined
               }
-              target={step.id === 1 || step.id === 5 ? '_blank' : undefined}
-              rel={step.id === 1 || step.id === 5 ? 'noopener noreferrer' : undefined}
+              target={step.id === 1 ? '_blank' : undefined}
+              rel={step.id === 1 ? 'noopener noreferrer' : undefined}
               onClick={() => {
-                handleCardClick(step.id);
+                if (step.id === 1 || step.id === 2) {
+                  handleCardClick(step.id);
+                }
               }}
-              whileHover={{ scale: 1.01 }}
+              whileHover={step.id === 1 || step.id === 2 ? { scale: 1.01 } : undefined}
               style={{
                 display: 'flex',
                 gap: '32px',
@@ -310,7 +299,7 @@ export const InstallGuidePage = () => {
                 borderRadius: '16px',
                 padding: '40px',
                 alignItems: 'flex-start',
-                cursor: 'pointer',
+                cursor: step.id === 1 || step.id === 2 ? 'pointer' : 'default',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
                 color: 'inherit'
