@@ -233,7 +233,7 @@ export const InstallGuidePage = () => {
           </div>
         </div>
 
-        {/* Progress Tracker (Clean Minimal Banner) */}
+        {/* Progress Tracker (Clean Minimal Banner with Curved Bottom Edges) */}
         <div style={{
           position: 'sticky',
           top: '64px',
@@ -244,6 +244,9 @@ export const InstallGuidePage = () => {
           isolation: 'isolate',
           padding: '16px 0 20px 0',
           borderBottom: '1px solid var(--border-primary)',
+          borderLeft: '1px solid var(--border-primary)',
+          borderRight: '1px solid var(--border-primary)',
+          borderRadius: '0 0 20px 20px',
           boxShadow: '0 8px 20px -4px rgba(0, 0, 0, 0.06)',
           marginBottom: '48px'
         }}>
