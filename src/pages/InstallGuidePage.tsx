@@ -155,7 +155,6 @@ export const InstallGuidePage = () => {
   ];
 
   const handleCardClick = (stepId: number) => {
-    toggleStepExpanded(stepId);
     switch (stepId) {
       case 1:
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
@@ -164,6 +163,7 @@ export const InstallGuidePage = () => {
         copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD!');
         break;
       case 3:
+        showToast('⚙️ FOLLOW INSTRUCTIONS TO ENABLE DEVELOPER MODE IN CHROME');
         break;
       case 4:
         copyText('extension/dist', '📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
@@ -341,6 +341,7 @@ export const InstallGuidePage = () => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       toggleStepExpanded(step.id);
                     }}
                     style={{
