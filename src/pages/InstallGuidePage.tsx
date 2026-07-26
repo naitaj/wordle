@@ -121,7 +121,7 @@ export const InstallGuidePage = () => {
     {
       id: 1,
       title: 'DOWNLOAD THE EXTENSION',
-      desc: 'DOWNLOAD THE EXTENSION ZIP FILE AND EXTRACT IT ON YOUR COMPUTER.',
+      desc: '',
       code: 'Click this card to download ZIP directly\nOr clone: git clone https://github.com/naitaj/wordle.git',
       actionLabel: 'DOWNLOAD ZIP FILE'
     },
@@ -370,9 +370,11 @@ export const InstallGuidePage = () => {
                   </button>
                 </div>
 
-                <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: 1.6, margin: '0 0 24px 0', whiteSpace: 'pre-line' }}>
-                  {step.desc}
-                </p>
+                {step.desc && (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: 1.6, margin: '0 0 24px 0', whiteSpace: 'pre-line' }}>
+                    {step.desc}
+                  </p>
+                )}
                 
                 {step.code && (
                   <pre style={{
