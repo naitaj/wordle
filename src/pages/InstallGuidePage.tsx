@@ -85,7 +85,7 @@ export const InstallGuidePage = () => {
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: 'CLICK TO COPY "chrome://extensions" ADDRESS AND PASTE IT IN A NEW TAB.',
+      desc: 'CLICK THIS CARD TO COPY THE EXTENSIONS ADDRESS.',
       code: 'chrome://extensions',
       actionLabel: 'VIEW INSTRUCTIONS'
     },
@@ -379,7 +379,8 @@ export const InstallGuidePage = () => {
                       HOW TO OPEN:
                     </div>
                     <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <li>OPEN A NEW TAB (<code>Ctrl + T</code> OR <code>Cmd + T</code>) AND PASTE THE COPIED ADDRESS INTO YOUR ADDRESS BAR.</li>
+                      <li>OPEN A NEW TAB (<code>Ctrl + T</code> OR <code>Cmd + T</code>).</li>
+                      <li>PASTE THE COPIED ADDRESS AND PRESS <strong>ENTER</strong>.</li>
                       <li>OR GO TO CHROME MENU (<strong>⋮</strong>) → <strong>EXTENSIONS</strong> → <strong>MANAGE EXTENSIONS</strong>.</li>
                     </ol>
                   </motion.div>
