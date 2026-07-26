@@ -32,10 +32,10 @@ export function Navbar() {
         height: '64px',
       }}>
         {/* Logo */}
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{
-            width: '36px',
-            height: '36px',
+            width: '48px',
+            height: '48px',
             background: '#000000',
             display: 'flex',
             alignItems: 'center',
@@ -43,7 +43,7 @@ export function Navbar() {
           }}>
             <span style={{
               fontFamily: '"Anton", sans-serif',
-              fontSize: '24px',
+              fontSize: '32px',
               color: '#ffffff',
               lineHeight: 1,
               paddingTop: '2px',
@@ -52,18 +52,18 @@ export function Navbar() {
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
             <span style={{
               fontFamily: '"Anton", sans-serif',
-              fontSize: '16px',
+              fontSize: '24px',
               color: '#000000',
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
             }}>WORDLE ENTROPY</span>
             <span style={{
               fontFamily: '"Roboto Condensed", sans-serif',
-              fontSize: '9px',
+              fontSize: '12px',
               color: 'var(--text-muted)',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
-              marginTop: '2px',
+              marginTop: '4px',
             }}>SOLVER</span>
           </div>
         </Link>
