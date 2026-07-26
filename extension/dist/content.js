@@ -1221,7 +1221,7 @@ function stopAssistLoop() {
 	}
 }
 function updateBadgeModeIndicator() {
-	updateBadge(`${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"} | ${activeAdapter ? activeAdapter.info.name : "UNSUPPORTED"}`);
+	updateBadge(currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST");
 }
 function createStatusBadge() {
 	const existing = document.getElementById("wordle-solver-badge-wrapper");
@@ -1230,8 +1230,8 @@ function createStatusBadge() {
 	wrapper.id = "wordle-solver-badge-wrapper";
 	wrapper.style.cssText = `
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    top: 20px;
+    left: 20px;
     z-index: 999999;
     display: flex;
     align-items: center;
@@ -1241,7 +1241,7 @@ function createStatusBadge() {
 	const badge = document.createElement("div");
 	badge.id = "wordle-solver-badge";
 	const isSupported = activeAdapter !== null;
-	badge.textContent = isSupported ? `${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"} | ${activeAdapter.info.name}` : "⚠️ UNSUPPORTED SITE";
+	badge.textContent = isSupported ? `${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"}` : "⚠️ UNSUPPORTED SITE";
 	badge.style.cssText = `
     background: ${isSupported ? "#000000" : "#b91c1c"};
     color: #ffffff;
@@ -1278,9 +1278,9 @@ function createStatusBadge() {
 	dropdown.id = "wordle-solver-dropdown";
 	dropdown.style.cssText = `
     position: absolute;
-    bottom: 100%;
-    right: 0;
-    margin-bottom: 8px;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
     background: #ffffff;
     border: 2px solid #000000;
     border-radius: 8px;
