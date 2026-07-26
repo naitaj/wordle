@@ -119,7 +119,7 @@ const WordleDemo = () => {
         {board.map((row, rowIdx) => (
           <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
             {row.map((tile, colIdx) => {
-              const bgColor = tile.revealed ? COLOR_MAP[tile.color] : 'transparent';
+              const bgColor = tile.revealed ? COLOR_MAP[tile.color] : '#121213';
               const borderColor = tile.letter && !tile.revealed ? '#565758' : tile.revealed ? COLOR_MAP[tile.color] : '#3a3a3c';
 
               return (
