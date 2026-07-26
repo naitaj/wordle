@@ -116,7 +116,7 @@ export const DownloadPage = () => {
         className="card"
         style={{ 
           backgroundColor: 'var(--bg-card)', 
-          border: '1px solid var(--border-primary)', 
+          border: '1.5px solid #15803d', 
           borderRadius: '16px', 
           padding: '48px', 
           textAlign: 'center',

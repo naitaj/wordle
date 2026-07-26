@@ -416,7 +416,7 @@ export const HomePage = () => {
               { title: 'CLEAN INTEGRATION', desc: 'Sits alongside the game without disruption', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z M4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z M16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' }
             ].map((feature, i) => (
               <motion.div key={i} variants={itemVariants} style={{
-                backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '24px',
+                backgroundColor: 'var(--bg-card)', border: '1.5px solid #15803d', borderRadius: '12px', padding: '24px',
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-start'
               }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px' }}>
@@ -450,7 +450,7 @@ export const HomePage = () => {
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px' }}>
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
+              backgroundColor: 'var(--bg-card)', border: '1.5px solid #15803d', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
               <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>CLASSIC WORDLE</span>
@@ -461,7 +461,7 @@ export const HomePage = () => {
             </motion.div>
             
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
+              backgroundColor: 'var(--bg-card)', border: '1.5px solid #15803d', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
               <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>MULTI-BOARD GAMES</span>
@@ -472,7 +472,7 @@ export const HomePage = () => {
             </motion.div>
 
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
+              backgroundColor: 'var(--bg-card)', border: '1.5px solid #15803d', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
               <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>MULTI-ROUND & SEQUENTIAL</span>
@@ -483,7 +483,7 @@ export const HomePage = () => {
             </motion.div>
 
             <motion.div variants={itemVariants} style={{
-              backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '32px',
+              backgroundColor: 'var(--bg-card)', border: '1.5px solid #15803d', borderRadius: '12px', padding: '32px',
               textAlign: 'left'
             }}>
               <span style={{ fontSize: '12px', fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontWeight: 700, letterSpacing: '0.15em' }}>ADVERSARIAL WORDLE</span>
