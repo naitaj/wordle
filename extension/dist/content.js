@@ -1220,8 +1220,14 @@ function stopAssistLoop() {
 		assistLoopTimeout = null;
 	}
 }
+var dropdownOpen = false;
 function updateBadgeModeIndicator() {
 	updateBadge(currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST");
+	const badge = document.getElementById("wordle-solver-badge");
+	if (badge) {
+		badge.style.background = currentMode === "auto" ? "#ffffff" : "#ffffff";
+		badge.style.color = "#000000";
+	}
 }
 function createStatusBadge() {
 	const existing = document.getElementById("wordle-solver-badge-wrapper");
@@ -1230,112 +1236,166 @@ function createStatusBadge() {
 	wrapper.id = "wordle-solver-badge-wrapper";
 	wrapper.style.cssText = `
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 16px;
+    right: 16px;
     z-index: 999999;
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 0px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   `;
 	const badge = document.createElement("div");
 	badge.id = "wordle-solver-badge";
 	const isSupported = activeAdapter !== null;
-	badge.textContent = isSupported ? `${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"}` : "⚠️ UNSUPPORTED SITE";
+	badge.textContent = isSupported ? `${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"}` : "⚠️ UNSUPPORTED";
 	badge.style.cssText = `
-    background: ${isSupported ? "#000000" : "#b91c1c"};
-    color: #ffffff;
-    padding: 10px 16px;
+    background: ${isSupported ? "#ffffff" : "#fef2f2"};
+    color: ${isSupported ? "#000000" : "#b91c1c"};
+    padding: 8px 14px;
     border-radius: 8px 0 0 8px;
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.08);
     cursor: pointer;
     user-select: none;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
+    border: 1.5px solid ${isSupported ? "#e4e4e7" : "#fca5a5"};
+    border-right: none;
   `;
+	badge.addEventListener("mouseenter", () => {
+		badge.style.background = isSupported ? "#f4f4f5" : "#fee2e2";
+	});
+	badge.addEventListener("mouseleave", () => {
+		badge.style.background = isSupported ? "#ffffff" : "#fef2f2";
+	});
 	const menuBtn = document.createElement("button");
 	menuBtn.id = "wordle-solver-menu-btn";
 	menuBtn.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
   `;
 	menuBtn.style.cssText = `
-    background: ${isSupported ? "#18181b" : "#991b1b"};
+    background: ${isSupported ? "#000000" : "#b91c1c"};
     color: #ffffff;
-    border: none;
-    padding: 10px 10px;
+    border: 1.5px solid ${isSupported ? "#000000" : "#b91c1c"};
+    padding: 8px 10px;
     border-radius: 0 8px 8px 0;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: all 0.15s ease;
   `;
+	menuBtn.addEventListener("mouseenter", () => {
+		menuBtn.style.background = isSupported ? "#27272a" : "#991b1b";
+	});
+	menuBtn.addEventListener("mouseleave", () => {
+		menuBtn.style.background = isSupported ? "#000000" : "#b91c1c";
+	});
 	const dropdown = document.createElement("div");
 	dropdown.id = "wordle-solver-dropdown";
 	dropdown.style.cssText = `
     position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 8px;
+    top: calc(100% + 6px);
+    right: 0;
     background: #ffffff;
-    border: 2px solid #000000;
-    border-radius: 8px;
+    border: 1.5px solid #e4e4e7;
+    border-radius: 10px;
     padding: 6px;
     display: none;
     flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    min-width: 170px;
+    gap: 2px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+    min-width: 200px;
   `;
-	[{
+	const modes = [{
 		id: "auto",
-		label: "⚡ Auto-Solve",
+		label: "Auto-Solve",
+		icon: "⚡",
 		desc: "Types & solves automatically"
 	}, {
 		id: "assist",
-		label: "💡 Assist Mode",
+		label: "Assist Mode",
+		icon: "💡",
 		desc: "Shows recommendations only"
-	}].forEach((mode) => {
-		const item = document.createElement("div");
-		item.style.cssText = `
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      transition: background 0.15s ease;
-      background: ${currentMode === mode.id ? "#f4f4f5" : "transparent"};
-    `;
-		const label = document.createElement("span");
-		label.textContent = mode.label;
-		label.style.cssText = "font-size: 12px; font-weight: 700; color: #000000;";
-		const desc = document.createElement("span");
-		desc.textContent = mode.desc;
-		desc.style.cssText = "font-size: 10px; color: #71717a;";
-		item.appendChild(label);
-		item.appendChild(desc);
-		item.addEventListener("click", (e) => {
-			e.stopPropagation();
-			currentMode = mode.id;
-			chrome.storage.local.set({ solverMode: currentMode });
-			if (currentMode === "auto") stopAssistLoop();
-			updateBadgeModeIndicator();
-			dropdown.classList.remove("show");
+	}];
+	function renderDropdownItems() {
+		dropdown.innerHTML = "";
+		modes.forEach((mode) => {
+			const isActive = currentMode === mode.id;
+			const item = document.createElement("div");
+			item.style.cssText = `
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.15s ease;
+        background: ${isActive ? "#f4f4f5" : "transparent"};
+      `;
+			const iconSpan = document.createElement("span");
+			iconSpan.textContent = mode.icon;
+			iconSpan.style.cssText = "font-size: 16px; flex-shrink: 0;";
+			const textCol = document.createElement("div");
+			textCol.style.cssText = "display: flex; flex-direction: column; gap: 1px;";
+			const label = document.createElement("span");
+			label.textContent = mode.label;
+			label.style.cssText = `font-size: 13px; font-weight: 700; color: #000000;`;
+			const desc = document.createElement("span");
+			desc.textContent = mode.desc;
+			desc.style.cssText = "font-size: 10px; color: #71717a; line-height: 1.3;";
+			textCol.appendChild(label);
+			textCol.appendChild(desc);
+			if (isActive) {
+				const check = document.createElement("span");
+				check.textContent = "✓";
+				check.style.cssText = "font-size: 14px; font-weight: 800; color: #000000; margin-left: auto;";
+				item.appendChild(iconSpan);
+				item.appendChild(textCol);
+				item.appendChild(check);
+			} else {
+				item.appendChild(iconSpan);
+				item.appendChild(textCol);
+			}
+			item.addEventListener("mouseenter", () => {
+				if (!isActive) item.style.background = "#fafafa";
+			});
+			item.addEventListener("mouseleave", () => {
+				item.style.background = isActive ? "#f4f4f5" : "transparent";
+			});
+			item.addEventListener("click", (e) => {
+				e.stopPropagation();
+				currentMode = mode.id;
+				chrome.storage.local.set({ solverMode: currentMode });
+				if (currentMode === "auto") stopAssistLoop();
+				updateBadgeModeIndicator();
+				renderDropdownItems();
+				toggleDropdown(false);
+			});
+			dropdown.appendChild(item);
 		});
-		dropdown.appendChild(item);
-	});
+	}
+	function toggleDropdown(show) {
+		dropdownOpen = show !== void 0 ? show : !dropdownOpen;
+		dropdown.style.display = dropdownOpen ? "flex" : "none";
+		const svg = menuBtn.querySelector("svg");
+		if (svg) {
+			svg.style.transform = dropdownOpen ? "rotate(180deg)" : "rotate(0deg)";
+			svg.style.transition = "transform 0.2s ease";
+		}
+	}
+	renderDropdownItems();
 	menuBtn.addEventListener("click", (e) => {
 		e.stopPropagation();
-		dropdown.classList.toggle("show");
+		toggleDropdown();
 	});
 	badge.addEventListener("click", () => {
 		if (!activeAdapter) {
-			updateBadge("⚠️ UNSUPPORTED VARIANT");
+			updateBadge("⚠️ UNSUPPORTED");
 			return;
 		}
 		chrome.runtime.sendMessage({ type: "GET_STATE" }, (response) => {
@@ -1348,7 +1408,7 @@ function createStatusBadge() {
 		});
 	});
 	document.addEventListener("click", (e) => {
-		if (!wrapper.contains(e.target)) dropdown.classList.remove("show");
+		if (!wrapper.contains(e.target)) toggleDropdown(false);
 	});
 	wrapper.appendChild(badge);
 	wrapper.appendChild(menuBtn);
