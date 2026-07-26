@@ -178,7 +178,7 @@ const WordleDemo = () => {
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'center', alignItems: 'flex-start', width: '100%' }}>
 
       {/* Wordle Board */}
-      <div style={{ display: 'grid', gridTemplateRows: 'repeat(6, 1fr)', gap: '6px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-primary)' }}>
+      <div style={{ display: 'grid', gridTemplateRows: 'repeat(6, 1fr)', gap: '6px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1.5px solid #15803d' }}>
         {board.map((row, rowIdx) => (
           <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
             {row.map((tile, colIdx) => {
@@ -233,7 +233,7 @@ const WordleDemo = () => {
         transition={{ duration: 0.5, delay: 0.3 }}
         style={{
           backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-primary)',
+          border: '1.5px solid #15803d',
           borderRadius: '12px',
           padding: '28px',
           minWidth: '260px',
@@ -518,7 +518,7 @@ export const HomePage = () => {
               { num: '4', title: 'START SOLVING', desc: 'Click Start and watch the entropy solver work' }
             ].map((step, i) => (
               <motion.div key={i} variants={itemVariants} style={{
-                position: 'relative', padding: '24px', border: '1px solid var(--border-primary)', borderRadius: '12px', backgroundColor: 'var(--bg-card)'
+                position: 'relative', padding: '24px', border: '1.5px solid #15803d', borderRadius: '12px', backgroundColor: 'var(--bg-card)'
               }}>
                 <div style={{ fontFamily: '"Anton", sans-serif', fontSize: '64px', color: 'var(--border-primary)', position: 'absolute', top: '10px', right: '20px', lineHeight: '1' }}>
                   {step.num}

@@ -17,14 +17,14 @@ export function Footer() {
       }}>
         {/* Brand */}
         <div style={{ maxWidth: '280px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{
-              width: '28px', height: '28px', background: '#000000',
+              width: '40px', height: '40px', background: '#000000',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '18px', color: '#fff', paddingTop: '1px' }}>W</span>
+              <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '26px', color: '#fff', paddingTop: '1px' }}>W</span>
             </div>
-            <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '14px', color: '#000000', letterSpacing: '0.05em' }}>WORDLE ENTROPY</span>
+            <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '20px', color: '#000000', letterSpacing: '0.05em' }}>WORDLE ENTROPY</span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
             Solve Wordle using Information Theory. An open-source browser extension built with Shannon entropy.
@@ -32,7 +32,7 @@ export function Footer() {
         </div>
 
         {/* Links */}
-        <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '48px', flex: 1, marginLeft: '32px' }}>
           <div>
             <h4 style={{
               fontFamily: '"Bebas Neue", sans-serif',
@@ -71,6 +71,9 @@ export function Footer() {
               <a href="https://github.com/naitaj/wordle" target="_blank" rel="noopener noreferrer" style={{
                 color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
               }}>GitHub</a>
+              <a href="https://www.linkedin.com/in/naila-s-a112b2374/" target="_blank" rel="noopener noreferrer" style={{
+                color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
+              }}>LinkedIn</a>
             </div>
           </div>
 

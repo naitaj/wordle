@@ -194,7 +194,7 @@ export const DownloadPage = () => {
               className="card"
               style={{
                 backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border-primary)',
+                border: '1.5px solid #15803d',
                 borderRadius: '12px',
                 padding: '32px',
                 display: 'flex',
@@ -242,7 +242,7 @@ export const DownloadPage = () => {
               className="card"
               style={{
                 backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border-primary)',
+                border: '1.5px solid #15803d',
                 borderRadius: '12px',
                 padding: '32px',
                 display: 'flex',
@@ -278,7 +278,7 @@ export const DownloadPage = () => {
 
         <div style={{ 
           backgroundColor: 'var(--bg-card)', 
-          border: '1px solid var(--border-primary)', 
+          border: '1.5px solid #15803d', 
           borderRadius: '12px', 
           padding: '40px',
           maxWidth: '800px',
