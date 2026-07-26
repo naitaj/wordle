@@ -229,7 +229,7 @@ export const InstallGuidePage = () => {
             margin: '24px auto 0',
             textAlign: 'center'
           }}>
-            💡 Tip: Clicking any step card below automatically triggers its task (Download ZIP, copy paths, or launch pages).
+            💡 Tip: Click Card 1 or Card 2 to download ZIP or copy address. Click the top-right button on any card for detailed instructions.
           </div>
         </div>
 
@@ -237,9 +237,9 @@ export const InstallGuidePage = () => {
         <div style={{
           position: 'sticky',
           top: '80px',
-          zIndex: 10,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(12px)',
+          zIndex: 40,
+          backgroundColor: '#ffffff',
+          boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)',
           padding: '20px',
           border: '1px solid var(--border-primary)',
           borderRadius: '16px',
