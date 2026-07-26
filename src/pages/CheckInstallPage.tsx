@@ -192,7 +192,7 @@ export const CheckInstallPage = () => {
                     href="https://www.nytimes.com/games/wordle/index.html" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="btn-secondary"
+                    className="btn-primary"
                     style={{
                       padding: '12px 24px',
                       fontFamily: '"Bebas Neue", sans-serif',
