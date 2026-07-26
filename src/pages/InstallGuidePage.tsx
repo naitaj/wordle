@@ -365,7 +365,61 @@ export const InstallGuidePage = () => {
                   </p>
                 )}
                 
-                {step.code && (
+                {step.id === 5 ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    margin: '16px 0 0 0'
+                  }}>
+                    <a
+                      href="https://www.nytimes.com/games/wordle/index.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        color: 'var(--accent-amber)',
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        textDecoration: 'underline',
+                        padding: '14px 18px',
+                        backgroundColor: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-primary)',
+                        borderRadius: '8px',
+                        wordBreak: 'break-all',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      🔗 https://www.nytimes.com/games/wordle/index.html ↗
+                    </a>
+                    <a
+                      href="https://wordleunlimited.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        color: 'var(--accent-amber)',
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        textDecoration: 'underline',
+                        padding: '14px 18px',
+                        backgroundColor: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-primary)',
+                        borderRadius: '8px',
+                        wordBreak: 'break-all',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      🔗 https://wordleunlimited.org/ ↗
+                    </a>
+                  </div>
+                ) : step.code && (
                   <pre style={{
                     backgroundColor: 'var(--bg-secondary)',
                     border: '1px solid var(--border-primary)',
