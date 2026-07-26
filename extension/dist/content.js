@@ -1221,17 +1221,20 @@ function stopAssistLoop() {
 	}
 }
 var dropdownOpen = false;
+var badgeElement = null;
+var wrapperElement = null;
 function updateBadgeModeIndicator() {
 	updateBadge(currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST");
-	const badge = document.getElementById("wordle-solver-badge");
-	if (badge) {
-		badge.style.background = currentMode === "auto" ? "#ffffff" : "#ffffff";
-		badge.style.color = "#000000";
-	}
+}
+function ensureBadgeCreated() {
+	if (wrapperElement && document.body.contains(wrapperElement)) return;
+	createStatusBadge();
 }
 function createStatusBadge() {
 	const existing = document.getElementById("wordle-solver-badge-wrapper");
 	if (existing) existing.remove();
+	const FONT = "\"Inter\", \"SF Pro Display\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif";
+	const isSupported = activeAdapter !== null;
 	const wrapper = document.createElement("div");
 	wrapper.id = "wordle-solver-badge-wrapper";
 	wrapper.style.cssText = `
@@ -1240,164 +1243,42 @@ function createStatusBadge() {
     right: 16px;
     z-index: 999999;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 0px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: ${FONT};
   `;
+	wrapperElement = wrapper;
 	const badge = document.createElement("div");
 	badge.id = "wordle-solver-badge";
-	const isSupported = activeAdapter !== null;
-	badge.textContent = isSupported ? `${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"}` : "⚠️ UNSUPPORTED";
+	badge.textContent = isSupported ? currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST" : "⚠️ UNSUPPORTED";
 	badge.style.cssText = `
     background: ${isSupported ? "#ffffff" : "#fef2f2"};
     color: ${isSupported ? "#000000" : "#b91c1c"};
-    padding: 8px 14px;
+    padding: 9px 16px;
     border-radius: 8px 0 0 8px;
     font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.08);
+    font-weight: 700;
+    font-family: ${FONT};
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
     cursor: pointer;
     user-select: none;
-    transition: all 0.15s ease;
-    border: 1.5px solid ${isSupported ? "#e4e4e7" : "#fca5a5"};
+    transition: background 0.15s ease;
+    border: 1.5px solid ${isSupported ? "#d4d4d8" : "#fca5a5"};
     border-right: none;
+    line-height: 1;
+    white-space: nowrap;
   `;
+	badgeElement = badge;
 	badge.addEventListener("mouseenter", () => {
 		badge.style.background = isSupported ? "#f4f4f5" : "#fee2e2";
 	});
 	badge.addEventListener("mouseleave", () => {
 		badge.style.background = isSupported ? "#ffffff" : "#fef2f2";
 	});
-	const menuBtn = document.createElement("button");
-	menuBtn.id = "wordle-solver-menu-btn";
-	menuBtn.innerHTML = `
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
-  `;
-	menuBtn.style.cssText = `
-    background: ${isSupported ? "#000000" : "#b91c1c"};
-    color: #ffffff;
-    border: 1.5px solid ${isSupported ? "#000000" : "#b91c1c"};
-    padding: 8px 10px;
-    border-radius: 0 8px 8px 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    transition: all 0.15s ease;
-  `;
-	menuBtn.addEventListener("mouseenter", () => {
-		menuBtn.style.background = isSupported ? "#27272a" : "#991b1b";
-	});
-	menuBtn.addEventListener("mouseleave", () => {
-		menuBtn.style.background = isSupported ? "#000000" : "#b91c1c";
-	});
-	const dropdown = document.createElement("div");
-	dropdown.id = "wordle-solver-dropdown";
-	dropdown.style.cssText = `
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    background: #ffffff;
-    border: 1.5px solid #e4e4e7;
-    border-radius: 10px;
-    padding: 6px;
-    display: none;
-    flex-direction: column;
-    gap: 2px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
-    min-width: 200px;
-  `;
-	const modes = [{
-		id: "auto",
-		label: "Auto-Solve",
-		icon: "⚡",
-		desc: "Types & solves automatically"
-	}, {
-		id: "assist",
-		label: "Assist Mode",
-		icon: "💡",
-		desc: "Shows recommendations only"
-	}];
-	function renderDropdownItems() {
-		dropdown.innerHTML = "";
-		modes.forEach((mode) => {
-			const isActive = currentMode === mode.id;
-			const item = document.createElement("div");
-			item.style.cssText = `
-        padding: 10px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: background 0.15s ease;
-        background: ${isActive ? "#f4f4f5" : "transparent"};
-      `;
-			const iconSpan = document.createElement("span");
-			iconSpan.textContent = mode.icon;
-			iconSpan.style.cssText = "font-size: 16px; flex-shrink: 0;";
-			const textCol = document.createElement("div");
-			textCol.style.cssText = "display: flex; flex-direction: column; gap: 1px;";
-			const label = document.createElement("span");
-			label.textContent = mode.label;
-			label.style.cssText = `font-size: 13px; font-weight: 700; color: #000000;`;
-			const desc = document.createElement("span");
-			desc.textContent = mode.desc;
-			desc.style.cssText = "font-size: 10px; color: #71717a; line-height: 1.3;";
-			textCol.appendChild(label);
-			textCol.appendChild(desc);
-			if (isActive) {
-				const check = document.createElement("span");
-				check.textContent = "✓";
-				check.style.cssText = "font-size: 14px; font-weight: 800; color: #000000; margin-left: auto;";
-				item.appendChild(iconSpan);
-				item.appendChild(textCol);
-				item.appendChild(check);
-			} else {
-				item.appendChild(iconSpan);
-				item.appendChild(textCol);
-			}
-			item.addEventListener("mouseenter", () => {
-				if (!isActive) item.style.background = "#fafafa";
-			});
-			item.addEventListener("mouseleave", () => {
-				item.style.background = isActive ? "#f4f4f5" : "transparent";
-			});
-			item.addEventListener("click", (e) => {
-				e.stopPropagation();
-				currentMode = mode.id;
-				chrome.storage.local.set({ solverMode: currentMode });
-				if (currentMode === "auto") stopAssistLoop();
-				updateBadgeModeIndicator();
-				renderDropdownItems();
-				toggleDropdown(false);
-			});
-			dropdown.appendChild(item);
-		});
-	}
-	function toggleDropdown(show) {
-		dropdownOpen = show !== void 0 ? show : !dropdownOpen;
-		dropdown.style.display = dropdownOpen ? "flex" : "none";
-		const svg = menuBtn.querySelector("svg");
-		if (svg) {
-			svg.style.transform = dropdownOpen ? "rotate(180deg)" : "rotate(0deg)";
-			svg.style.transition = "transform 0.2s ease";
-		}
-	}
-	renderDropdownItems();
-	menuBtn.addEventListener("click", (e) => {
+	badge.addEventListener("click", (e) => {
 		e.stopPropagation();
-		toggleDropdown();
-	});
-	badge.addEventListener("click", () => {
-		if (!activeAdapter) {
-			updateBadge("⚠️ UNSUPPORTED");
-			return;
-		}
+		if (!activeAdapter) return;
 		chrome.runtime.sendMessage({ type: "GET_STATE" }, (response) => {
 			if (chrome.runtime.lastError) return;
 			if (response?.success && response.data) if (response.data.isRunning) chrome.runtime.sendMessage({ type: "STOP_SOLVER" });
@@ -1407,8 +1288,102 @@ function createStatusBadge() {
 			});
 		});
 	});
+	const menuBtn = document.createElement("button");
+	menuBtn.id = "wordle-solver-menu-btn";
+	menuBtn.innerHTML = "<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"transition:transform 0.2s ease\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>";
+	menuBtn.style.cssText = `
+    background: ${isSupported ? "#18181b" : "#b91c1c"};
+    color: #ffffff;
+    border: 1.5px solid ${isSupported ? "#18181b" : "#b91c1c"};
+    padding: 9px 10px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    transition: background 0.15s ease;
+    line-height: 1;
+  `;
+	menuBtn.addEventListener("mouseenter", () => {
+		menuBtn.style.background = isSupported ? "#27272a" : "#991b1b";
+	});
+	menuBtn.addEventListener("mouseleave", () => {
+		menuBtn.style.background = isSupported ? "#18181b" : "#b91c1c";
+	});
+	const dropdown = document.createElement("div");
+	dropdown.id = "wordle-solver-dropdown";
+	dropdown.style.cssText = `
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #ffffff;
+    border: 1.5px solid #d4d4d8;
+    border-radius: 10px;
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+    min-width: 210px;
+    font-family: ${FONT};
+  `;
+	function renderItems() {
+		dropdown.innerHTML = "";
+		[{
+			id: "auto",
+			label: "Auto-Solve",
+			icon: "⚡",
+			desc: "Types & solves automatically"
+		}, {
+			id: "assist",
+			label: "Assist Mode",
+			icon: "💡",
+			desc: "Shows recommendations only"
+		}].forEach((mode) => {
+			const active = currentMode === mode.id;
+			const item = document.createElement("div");
+			item.style.cssText = `padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.12s ease;background:${active ? "#f4f4f5" : "transparent"};font-family:${FONT};`;
+			item.innerHTML = `
+        <span style="font-size:16px;flex-shrink:0">${mode.icon}</span>
+        <div style="display:flex;flex-direction:column;gap:1px;flex:1">
+          <span style="font-size:13px;font-weight:700;color:#000;font-family:${FONT}">${mode.label}</span>
+          <span style="font-size:10px;color:#71717a;line-height:1.3;font-family:${FONT}">${mode.desc}</span>
+        </div>
+        ${active ? "<span style=\"font-size:14px;font-weight:800;color:#18181b\">✓</span>" : ""}
+      `;
+			item.addEventListener("mouseenter", () => {
+				item.style.background = active ? "#f4f4f5" : "#fafafa";
+			});
+			item.addEventListener("mouseleave", () => {
+				item.style.background = active ? "#f4f4f5" : "transparent";
+			});
+			item.addEventListener("click", (e) => {
+				e.stopPropagation();
+				currentMode = mode.id;
+				chrome.storage.local.set({ solverMode: currentMode });
+				if (currentMode === "auto") stopAssistLoop();
+				updateBadgeModeIndicator();
+				renderItems();
+				openDropdown(false);
+			});
+			dropdown.appendChild(item);
+		});
+	}
+	function openDropdown(open) {
+		dropdownOpen = open;
+		dropdown.style.display = dropdownOpen ? "flex" : "none";
+		const svg = menuBtn.querySelector("svg");
+		if (svg) svg.style.transform = dropdownOpen ? "rotate(180deg)" : "rotate(0)";
+	}
+	renderItems();
+	menuBtn.addEventListener("click", (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		openDropdown(!dropdownOpen);
+	});
 	document.addEventListener("click", (e) => {
-		if (!wrapper.contains(e.target)) toggleDropdown(false);
+		if (!wrapper.contains(e.target)) openDropdown(false);
 	});
 	wrapper.appendChild(badge);
 	wrapper.appendChild(menuBtn);
@@ -1417,9 +1392,8 @@ function createStatusBadge() {
 	return badge;
 }
 function updateBadge(text) {
-	let badge = document.getElementById("wordle-solver-badge");
-	if (!badge) badge = createStatusBadge();
-	badge.textContent = text;
+	ensureBadgeCreated();
+	if (badgeElement) badgeElement.textContent = text;
 }
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	const handler = async () => {
