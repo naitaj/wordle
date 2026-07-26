@@ -376,13 +376,11 @@ export const InstallGuidePage = () => {
                     }}
                   >
                     <div style={{ fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', color: 'var(--accent-green)', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', letterSpacing: '1px' }}>
-                      INSTRUCTIONS TO OPEN:
+                      HOW TO OPEN:
                     </div>
                     <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <li>THIS CARD AUTOMATICALLY COPIED <strong>"chrome://extensions"</strong> TO YOUR CLIPBOARD.</li>
-                      <li>OPEN A NEW BROWSER TAB BY PRESSING <code>Ctrl + T</code> (OR <code>Cmd + T</code> ON MAC).</li>
-                      <li>PASTE <strong>"chrome://extensions"</strong> INTO THE ADDRESS BAR AND PRESS <strong>ENTER</strong>.</li>
-                      <li>OR CLICK CHROME MENU (<strong>⋮</strong>) → <strong>EXTENSIONS</strong> → <strong>MANAGE EXTENSIONS</strong>.</li>
+                      <li>OPEN A NEW TAB (<code>Ctrl + T</code> OR <code>Cmd + T</code>) AND PASTE THE COPIED ADDRESS INTO YOUR ADDRESS BAR.</li>
+                      <li>OR GO TO CHROME MENU (<strong>⋮</strong>) → <strong>EXTENSIONS</strong> → <strong>MANAGE EXTENSIONS</strong>.</li>
                     </ol>
                   </motion.div>
                 )}
