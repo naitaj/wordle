@@ -81,7 +81,7 @@ export const HomePage = () => {
           style={{ marginBottom: '100px' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', fontWeight: 800, letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
               FEATURES
             </div>
             <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '48px', margin: '0', textTransform: 'uppercase' }}>
@@ -127,7 +127,7 @@ export const HomePage = () => {
           style={{ marginBottom: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', fontWeight: 800, letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
               DEMO
             </div>
             <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '48px', margin: '0', textTransform: 'uppercase' }}>
@@ -201,7 +201,7 @@ export const HomePage = () => {
           style={{ marginBottom: '100px' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', fontWeight: 800, letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
               COMPATIBILITY
             </div>
             <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '48px', margin: '0', textTransform: 'uppercase' }}>
@@ -263,7 +263,7 @@ export const HomePage = () => {
           style={{ marginBottom: '80px', textAlign: 'center' }}
         >
           <div style={{ marginBottom: '48px' }}>
-            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', fontWeight: 800, letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: '"Roboto Condensed", sans-serif', color: 'var(--accent-green)', fontSize: '24px', letterSpacing: '0.2em', marginBottom: '8px', textTransform: 'uppercase' }}>
               GETTING STARTED
             </div>
             <h2 style={{ fontFamily: '"Anton", sans-serif', fontSize: '48px', margin: '0', textTransform: 'uppercase' }}>
