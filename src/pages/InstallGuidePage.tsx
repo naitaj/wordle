@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 export const InstallGuidePage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [isStep3Expanded, setIsStep3Expanded] = useState(false);
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
   const showToast = (message: string) => {
@@ -119,7 +120,7 @@ export const InstallGuidePage = () => {
         copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD! OPENING PAGE...');
         break;
       case 3:
-        copyText('In chrome://extensions, toggle on the "Developer mode" switch in the top-right corner.', '📋 COPIED DEVELOPER MODE INSTRUCTION!');
+        setIsStep3Expanded(prev => !prev);
         break;
       case 4:
         copyText('extension/dist', '📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
@@ -358,6 +359,34 @@ export const InstallGuidePage = () => {
                   )
                 )}
 
+                 {step.id === 3 && isStep3Expanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      marginTop: '20px',
+                      padding: '20px',
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderLeft: '4px solid var(--accent-green)',
+                      borderRadius: '8px',
+                      fontSize: '15px',
+                      lineHeight: '1.7',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', color: 'var(--accent-green)', fontFamily: '"Bebas Neue", sans-serif', fontSize: '20px', letterSpacing: '1px' }}>
+                      INSTRUCTIONS:
+                    </div>
+                    <ol style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <li>LOOK AT THE TOP-RIGHT CORNER OF THE EXTENSIONS PAGE.</li>
+                      <li>FIND THE TOGGLE SWITCH LABELED <strong>"DEVELOPER MODE"</strong>.</li>
+                      <li>CLICK THE TOGGLE SWITCH TO TURN IT <strong>ON</strong>.</li>
+                      <li>A NEW SUB-TOOLBAR WILL APPEAR WITH BUTTONS LIKE <em>"LOAD UNPACKED"</em>.</li>
+                    </ol>
+                  </motion.div>
+                )}
+
                 {step.actionLabel && (
                   <div style={{
                     marginTop: '16px',
@@ -374,7 +403,10 @@ export const InstallGuidePage = () => {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    {step.actionLabel}
+                    {step.id === 3 
+                      ? (isStep3Expanded ? 'COLLAPSE DETAILED INSTRUCTIONS' : 'VIEW DETAILED INSTRUCTIONS') 
+                      : step.actionLabel
+                    }
                   </div>
                 )}
               </div>
