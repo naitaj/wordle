@@ -82,7 +82,7 @@ export function Footer() {
               color: 'var(--text-muted)',
               marginBottom: '12px',
             }}>SUPPORTED WEBSITES</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ columns: 2, columnGap: '32px' }}>
               {[
                 { label: 'NYT Wordle', url: 'https://www.nytimes.com/games/wordle/index.html' },
                 { label: 'Wordle Unlimited', url: 'https://wordleunlimited.org/' },
@@ -97,7 +97,7 @@ export function Footer() {
                 { label: 'WordGuessr', url: 'https://wordguessr.com/' },
               ].map(site => (
                 <a key={site.url} href={site.url} target="_blank" rel="noopener noreferrer" style={{
-                  color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px',
+                  color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', display: 'block', marginBottom: '8px', breakInside: 'avoid',
                 }}>{site.label}</a>
               ))}
             </div>
