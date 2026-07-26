@@ -1,421 +1,1349 @@
-//#region extension/src/content/selectors.ts
+//#region extension/src/adapters/nyt.ts
 /**
-* Selector Abstraction Layer for NYT Wordle and Wordle Unlimited DOM.
-* When either site changes their DOM structure, only this file needs updating.
-* 
-* Strategy: Use data attributes and custom elements (stable) over CSS class names (hashed/unstable).
+* Adapter for Official NYT Wordle and Wordle Unlimited.
 */
-var SELECTORS = {
-	tileByState: "[data-state]",
-	keyButton: "button[data-key]",
-	row: "[role=\"group\"][aria-label*=\"Row\"]",
-	boardFallback: "[class*=\"Board-module\"]",
-	rowFallback: "[class*=\"Row-module\"]",
-	tileFallback: "[class*=\"Tile-module\"]"
-};
-var DATA_ATTRS = {
-	tileState: "data-state",
-	tileLetter: "data-letter",
-	keyData: "data-key"
-};
-var TILE_STATES = {
-	empty: "empty",
-	tbd: "tbd",
-	correct: "correct",
-	present: "present",
-	absent: "absent"
-};
-/**
-* Detect if we are currently running on wordleunlimited.org.
-*/
-function isWordleName() {
-	return window.location.hostname.includes("wordleunlimited.org");
-}
-/**
-* Find all game tiles in the DOM.
-* Returns them in order: row 0 tile 0, row 0 tile 1, ..., row 5 tile 4 (30 total).
-*/
-function findAllTiles() {
-	if (isWordleName()) {
-		const gameApp = document.querySelector("game-app");
-		if (!gameApp || !gameApp.shadowRoot) return [];
-		const gameRows = Array.from(gameApp.shadowRoot.querySelectorAll("game-row"));
-		const tiles = [];
-		for (const row of gameRows) if (row.shadowRoot) {
-			const rowTiles = Array.from(row.shadowRoot.querySelectorAll("game-tile"));
-			tiles.push(...rowTiles);
-		}
-		return tiles;
+var NytAdapter = class {
+	constructor() {
+		this.info = {
+			id: "nyt",
+			name: "NYT Wordle / Unlimited",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
 	}
-	let tiles = Array.from(document.querySelectorAll(SELECTORS.tileByState));
-	tiles = tiles.filter((el) => el.tagName !== "BUTTON");
-	if (tiles.length === 30) return tiles;
-	tiles = Array.from(document.querySelectorAll(SELECTORS.tileFallback));
-	if (tiles.length === 30) return tiles;
-	const allDivs = document.querySelectorAll("div");
-	for (const div of allDivs) if (div.children.length === 6) {
-		let isBoard = true;
-		for (const child of div.children) if (child.children.length !== 5) {
-			isBoard = false;
+	detectGame() {
+		const host = window.location.hostname;
+		return host.includes("nytimes.com") || host.includes("wordleunlimited.org");
+	}
+	readBoard(boardIndex = 0) {
+		const isUnlimited = window.location.hostname.includes("wordleunlimited.org");
+		let tiles = [];
+		if (isUnlimited) {
+			const gameApp = document.querySelector("game-app");
+			if (gameApp && gameApp.shadowRoot) {
+				const gameRows = Array.from(gameApp.shadowRoot.querySelectorAll("game-row"));
+				for (const row of gameRows) if (row.shadowRoot) {
+					const rowTiles = Array.from(row.shadowRoot.querySelectorAll("game-tile"));
+					tiles.push(...rowTiles);
+				}
+			}
+		} else {
+			let stateTiles = Array.from(document.querySelectorAll("[data-state]"));
+			stateTiles = stateTiles.filter((el) => el.tagName !== "BUTTON");
+			if (stateTiles.length === 30) tiles = stateTiles;
+			else tiles = Array.from(document.querySelectorAll("[class*=\"Tile-module\"]"));
+		}
+		const rows = [];
+		for (let r = 0; r < 6; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const tile = tiles[r * 5 + c];
+				if (tile) {
+					const letter = (tile.getAttribute("data-letter") || tile.textContent || "").trim().toLowerCase();
+					const rawState = (tile.getAttribute("data-state") || tile.getAttribute("evaluation") || "empty").toLowerCase();
+					let state = "empty";
+					if (rawState.includes("correct")) state = "correct";
+					else if (rawState.includes("present")) state = "present";
+					else if (rawState.includes("absent")) state = "absent";
+					else if (rawState.includes("tbd")) state = "tbd";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 6;
+		for (let r = 0; r < 6; r++) {
+			const rowStates = rows[r].map((t) => t.state);
+			const isEvaluated = rowStates.every((s) => s === "correct" || s === "present" || s === "absent");
+			const isEmpty = rowStates.every((s) => s === "empty");
+			const hasTbd = rowStates.some((s) => s === "tbd");
+			if (isEmpty || hasTbd || !isEvaluated) {
+				currentRow = r;
+				break;
+			}
+		}
+		let gameStatus = "playing";
+		try {
+			if (isUnlimited) {
+				const stored = JSON.parse(localStorage.getItem("gameState") || "{}");
+				if (stored.gameStatus === "WIN") gameStatus = "won";
+				else if (stored.gameStatus === "FAIL") gameStatus = "lost";
+			} else {
+				const stateKey = Object.keys(localStorage).find((k) => k.includes("wordle") && k.includes("state"));
+				if (stateKey) {
+					const stored = JSON.parse(localStorage.getItem(stateKey) || "{}");
+					if (stored.gameStatus === "WIN") gameStatus = "won";
+					else if (stored.gameStatus === "FAIL") gameStatus = "lost";
+				}
+			}
+		} catch {
+			if (currentRow > 0) {
+				if (rows[currentRow - 1]?.every((t) => t.state === "correct")) gameStatus = "won";
+				else if (currentRow >= 6) gameStatus = "lost";
+			}
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		const isUnlimited = window.location.hostname.includes("wordleunlimited.org");
+		for (const char of word) {
+			this.dispatchKey(char, isUnlimited);
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		this.dispatchKey("Enter", isUnlimited);
+	}
+	dispatchKey(key, isUnlimited) {
+		const keyUpper = key.toUpperCase();
+		if (isUnlimited) {
+			const gameApp = document.querySelector("game-app");
+			if (gameApp && gameApp.shadowRoot) {
+				const keyboard = gameApp.shadowRoot.querySelector("game-keyboard");
+				if (keyboard && keyboard.shadowRoot) {
+					const btn = keyboard.shadowRoot.querySelector(`button[data-key="${keyUpper === "ENTER" ? "↵" : keyUpper}"]`) || keyboard.shadowRoot.querySelector(`button[data-key="${keyUpper}"]`);
+					if (btn) {
+						btn.click();
+						return;
+					}
+				}
+			}
+		}
+		const keyButton = document.querySelector(`button[data-key="${keyUpper}"]`) || document.querySelector(`button[data-key="${key}"]`);
+		if (keyButton) keyButton.click();
+		else window.dispatchEvent(new KeyboardEvent("keydown", {
+			key,
+			code: `Key${keyUpper}`,
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1800));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keyButtons = Array.from(document.querySelectorAll("button[data-key]"));
+		for (const btn of keyButtons) {
+			const key = (btn.getAttribute("data-key") || "").toLowerCase();
+			const state = (btn.getAttribute("data-state") || "empty").toLowerCase();
+			if (key && key.length === 1 && key >= "a" && key <= "z") if (state.includes("correct")) kb[key] = "correct";
+			else if (state.includes("present")) kb[key] = "present";
+			else if (state.includes("absent")) kb[key] = "absent";
+			else kb[key] = "empty";
+		}
+		return kb;
+	}
+	isGameFinished() {
+		const state = this.readBoard(0);
+		return state.gameStatus === "won" || state.gameStatus === "lost";
+	}
+};
+//#endregion
+//#region extension/src/adapters/hellowordl.ts
+var HelloWordlAdapter = class {
+	constructor() {
+		this.info = {
+			id: "hellowordl",
+			name: "Hello Wordl",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		return window.location.hostname.includes("hellowordl.net");
+	}
+	readBoard(boardIndex = 0) {
+		const tileElements = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 6; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tileElements[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || "").trim().toLowerCase();
+					const className = (el.className || "").toLowerCase();
+					const attrState = (el.getAttribute("data-state") || "").toLowerCase();
+					let state = "empty";
+					if (className.includes("correct") || attrState.includes("correct")) state = "correct";
+					else if (className.includes("present") || attrState.includes("present")) state = "present";
+					else if (className.includes("absent") || attrState.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 6;
+		for (let r = 0; r < 6; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
 			break;
 		}
-		if (isBoard) return Array.from(div.querySelectorAll(":scope > * > *"));
+		let gameStatus = "playing";
+		if (currentRow > 0) {
+			if (rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+			else if (currentRow >= 6) gameStatus = "lost";
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
 	}
-	return tiles;
-}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1500));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		const s = this.readBoard(0);
+		return s.gameStatus === "won" || s.gameStatus === "lost";
+	}
+};
+//#endregion
+//#region extension/src/adapters/dordle.ts
+var DordleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "dordle",
+			name: "Dordle (2 Boards)",
+			boardCount: 2,
+			isMultiBoard: true,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		const host = window.location.hostname;
+		return host.includes("dordle.io") || host.includes("zaratustra.itch.io/dordle");
+	}
+	readBoard(boardIndex = 0) {
+		const targetBoard = Array.from(document.querySelectorAll(".board, [class*=\"board\"], [id*=\"board\"]"))[boardIndex] || document.body;
+		const tiles = Array.from(targetBoard.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 7; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || el.getAttribute("data-letter") || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					const stateAttr = (el.getAttribute("data-state") || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || stateAttr.includes("correct")) state = "correct";
+					else if (cls.includes("present") || stateAttr.includes("present")) state = "present";
+					else if (cls.includes("absent") || stateAttr.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 7;
+		for (let r = 0; r < 7; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0) {
+			if (rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+			else if (currentRow >= 7) gameStatus = "lost";
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0), this.readBoard(1)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1800));
+		return this.readBoard(boardIndex).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll("button[data-key], .key"));
+		for (const k of keys) {
+			const txt = (k.getAttribute("data-key") || k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				const state = (k.getAttribute("data-state") || "").toLowerCase();
+				if (cls.includes("correct") || state.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present") || state.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent") || state.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		const b1 = this.readBoard(0);
+		const b2 = this.readBoard(1);
+		return b1.gameStatus !== "playing" && b2.gameStatus !== "playing";
+	}
+};
+//#endregion
+//#region extension/src/adapters/quordle.ts
+var QuordleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "quordle",
+			name: "Quordle (4 Boards)",
+			boardCount: 4,
+			isMultiBoard: true,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		const host = window.location.hostname;
+		return host.includes("quordle.com") || host.includes("merriam-webster.com/games/quordle");
+	}
+	readBoard(boardIndex = 0) {
+		const targetBoard = Array.from(document.querySelectorAll("[aria-label*=\"Board\"], [class*=\"Board\"], .board"))[boardIndex] || document.body;
+		const tiles = Array.from(targetBoard.querySelectorAll("[aria-label*=\"Tile\"], [class*=\"Tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 9; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || el.getAttribute("data-letter") || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					const stateAttr = (el.getAttribute("data-state") || el.getAttribute("aria-label") || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || stateAttr.includes("correct")) state = "correct";
+					else if (cls.includes("present") || stateAttr.includes("present")) state = "present";
+					else if (cls.includes("absent") || stateAttr.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 9;
+		for (let r = 0; r < 9; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0) {
+			if (rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+			else if (currentRow >= 9) gameStatus = "lost";
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [
+			0,
+			1,
+			2,
+			3
+		].map((i) => this.readBoard(i));
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			const btn = document.querySelector(`button[data-key="${char.toUpperCase()}"]`) || document.querySelector(`button[aria-label="${char.toUpperCase()}"]`);
+			if (btn) btn.click();
+			else window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		const enterBtn = document.querySelector("button[data-key=\"Enter\"]") || document.querySelector("button[aria-label=\"Enter\"]");
+		if (enterBtn) enterBtn.click();
+		else window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 2e3));
+		return this.readBoard(boardIndex).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll("button[data-key], button[aria-label]"));
+		for (const k of keys) {
+			const txt = (k.getAttribute("data-key") || k.getAttribute("aria-label") || k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		return this.readAllBoards().every((b) => b.gameStatus !== "playing");
+	}
+};
+//#endregion
+//#region extension/src/adapters/octordle.ts
+var OctordleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "octordle",
+			name: "Octordle (8 Boards)",
+			boardCount: 8,
+			isMultiBoard: true,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		return window.location.hostname.includes("octordle.com");
+	}
+	readBoard(boardIndex = 0) {
+		const targetBoard = Array.from(document.querySelectorAll("[id*=\"board\"], [class*=\"board\"], .octordle-board"))[boardIndex] || document.body;
+		const tiles = Array.from(targetBoard.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 13; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || el.getAttribute("data-letter") || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					const stateAttr = (el.getAttribute("data-state") || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || stateAttr.includes("correct")) state = "correct";
+					else if (cls.includes("present") || stateAttr.includes("present")) state = "present";
+					else if (cls.includes("absent") || stateAttr.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 13;
+		for (let r = 0; r < 13; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0) {
+			if (rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+			else if (currentRow >= 13) gameStatus = "lost";
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return Array.from({ length: 8 }, (_, i) => this.readBoard(i));
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 2200));
+		return this.readBoard(boardIndex).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		return this.readAllBoards().every((b) => b.gameStatus !== "playing");
+	}
+};
+//#endregion
+//#region extension/src/adapters/sedecordle.ts
+var SedecordleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "sedecordle",
+			name: "Sedecordle (16 Boards)",
+			boardCount: 16,
+			isMultiBoard: true,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		return window.location.hostname.includes("sedecordle.com");
+	}
+	readBoard(boardIndex = 0) {
+		const targetBoard = Array.from(document.querySelectorAll("[id*=\"board\"], [class*=\"board\"], .grid"))[boardIndex] || document.body;
+		const tiles = Array.from(targetBoard.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 21; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || el.getAttribute("data-letter") || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					const stateAttr = (el.getAttribute("data-state") || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || stateAttr.includes("correct")) state = "correct";
+					else if (cls.includes("present") || stateAttr.includes("present")) state = "present";
+					else if (cls.includes("absent") || stateAttr.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 21;
+		for (let r = 0; r < 21; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0) {
+			if (rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+			else if (currentRow >= 21) gameStatus = "lost";
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return Array.from({ length: 16 }, (_, i) => this.readBoard(i));
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 2500));
+		return this.readBoard(boardIndex).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		return this.readAllBoards().every((b) => b.gameStatus !== "playing");
+	}
+};
+//#endregion
+//#region extension/src/adapters/hurdle.ts
+var HurdleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "hurdle",
+			name: "Hurdle (Multi-Round)",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: true,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		const host = window.location.hostname;
+		return host.includes("arkadium.com/games/hurdle") || host.includes("hurdle");
+	}
+	readBoard(boardIndex = 0) {
+		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 6; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					const stateAttr = (el.getAttribute("data-state") || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || stateAttr.includes("correct")) state = "correct";
+					else if (cls.includes("present") || stateAttr.includes("present")) state = "present";
+					else if (cls.includes("absent") || stateAttr.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 6;
+		for (let r = 0; r < 6; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0) {
+			if (rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+			else if (currentRow >= 6) gameStatus = "lost";
+		}
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1800));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		const s = this.readBoard(0);
+		return s.gameStatus === "won" || s.gameStatus === "lost";
+	}
+	async reset() {
+		await new Promise((r) => setTimeout(r, 500));
+	}
+};
+//#endregion
+//#region extension/src/adapters/absurdle.ts
+var AbsurdleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "absurdle",
+			name: "Absurdle (Adversarial)",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		return window.location.hostname.includes("qntm.org/files/absurdle") || window.location.pathname.includes("absurdle");
+	}
+	readBoard(boardIndex = 0) {
+		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], td"));
+		const rows = [];
+		const totalRows = Math.max(6, Math.floor(tiles.length / 5));
+		for (let r = 0; r < totalRows; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("exact") || cls.includes("correct")) state = "correct";
+					else if (cls.includes("inexact") || cls.includes("present")) state = "present";
+					else if (cls.includes("wrong") || cls.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = totalRows;
+		for (let r = 0; r < totalRows; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0 && rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1200));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("exact") || cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("inexact") || cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("wrong") || cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		return this.readBoard(0).gameStatus === "won";
+	}
+};
+//#endregion
+//#region extension/src/adapters/evilwordle.ts
+var EvilWordleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "evilwordle",
+			name: "Evil Wordle",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		return window.location.hostname.includes("swag.github.io/evil-wordle") || window.location.hostname.includes("evil-wordle");
+	}
+	readBoard(boardIndex = 0) {
+		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 6; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || cls.includes("green")) state = "correct";
+					else if (cls.includes("present") || cls.includes("yellow")) state = "present";
+					else if (cls.includes("absent") || cls.includes("gray")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 6;
+		for (let r = 0; r < 6; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0 && rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+		else if (currentRow >= 6) gameStatus = "lost";
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1500));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		const s = this.readBoard(0);
+		return s.gameStatus === "won" || s.gameStatus === "lost";
+	}
+};
+//#endregion
+//#region extension/src/adapters/kilordle.ts
+var KilordleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "kilordle",
+			name: "Kilordle (Sequential 1000 Boards)",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: false,
+			isSequential: true,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		return window.location.hostname.includes("kilordle.com");
+	}
+	readBoard(boardIndex = 0) {
+		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 6; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct")) state = "correct";
+					else if (cls.includes("present")) state = "present";
+					else if (cls.includes("absent")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 6;
+		for (let r = 0; r < 6; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0 && rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1200));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		return this.readBoard(0).gameStatus === "won";
+	}
+	async reset() {
+		await new Promise((r) => setTimeout(r, 300));
+	}
+};
+//#endregion
+//#region extension/src/adapters/lingle.ts
+var LingleAdapter = class {
+	constructor() {
+		this.info = {
+			id: "lingle",
+			name: "Lingle",
+			boardCount: 1,
+			isMultiBoard: false,
+			isMultiRound: false,
+			isSequential: false,
+			supportsAutoPlay: true
+		};
+	}
+	detectGame() {
+		const host = window.location.hostname;
+		return host.includes("lingle.today") || host.includes("lingle");
+	}
+	readBoard(boardIndex = 0) {
+		const tiles = Array.from(document.querySelectorAll(".tile, [class*=\"tile\"], [data-state]"));
+		const rows = [];
+		for (let r = 0; r < 6; r++) {
+			const row = [];
+			for (let c = 0; c < 5; c++) {
+				const el = tiles[r * 5 + c];
+				if (el) {
+					const letter = (el.textContent || "").trim().toLowerCase();
+					const cls = (el.className || "").toLowerCase();
+					let state = "empty";
+					if (cls.includes("correct") || cls.includes("right")) state = "correct";
+					else if (cls.includes("present") || cls.includes("misplaced")) state = "present";
+					else if (cls.includes("absent") || cls.includes("wrong")) state = "absent";
+					row.push({
+						letter,
+						state
+					});
+				} else row.push({
+					letter: "",
+					state: "empty"
+				});
+			}
+			rows.push(row);
+		}
+		let currentRow = 6;
+		for (let r = 0; r < 6; r++) if (!rows[r].every((t) => t.state === "correct" || t.state === "present" || t.state === "absent")) {
+			currentRow = r;
+			break;
+		}
+		let gameStatus = "playing";
+		if (currentRow > 0 && rows[currentRow - 1].every((t) => t.state === "correct")) gameStatus = "won";
+		else if (currentRow >= 6) gameStatus = "lost";
+		return {
+			rows,
+			currentRow,
+			gameStatus
+		};
+	}
+	readAllBoards() {
+		return [this.readBoard(0)];
+	}
+	async submitGuess(word, delay) {
+		for (const char of word) {
+			window.dispatchEvent(new KeyboardEvent("keydown", {
+				key: char,
+				code: `Key${char.toUpperCase()}`,
+				bubbles: true
+			}));
+			await new Promise((r) => setTimeout(r, delay));
+		}
+		await new Promise((r) => setTimeout(r, delay));
+		window.dispatchEvent(new KeyboardEvent("keydown", {
+			key: "Enter",
+			code: "Enter",
+			bubbles: true
+		}));
+	}
+	async waitForReveal(boardIndex, rowIndex) {
+		await new Promise((r) => setTimeout(r, 1500));
+		return this.readBoard(0).rows[rowIndex] || [];
+	}
+	getKeyboardState() {
+		const kb = {};
+		const keys = Array.from(document.querySelectorAll(".key, button"));
+		for (const k of keys) {
+			const txt = (k.textContent || "").trim().toLowerCase();
+			if (txt.length === 1 && txt >= "a" && txt <= "z") {
+				const cls = (k.className || "").toLowerCase();
+				if (cls.includes("correct")) kb[txt] = "correct";
+				else if (cls.includes("present")) kb[txt] = "present";
+				else if (cls.includes("absent")) kb[txt] = "absent";
+				else kb[txt] = "empty";
+			}
+		}
+		return kb;
+	}
+	isGameFinished() {
+		const s = this.readBoard(0);
+		return s.gameStatus === "won" || s.gameStatus === "lost";
+	}
+};
+//#endregion
+//#region extension/src/adapters/adapterRegistry.ts
+var ALL_ADAPTERS = [
+	new NytAdapter(),
+	new HelloWordlAdapter(),
+	new DordleAdapter(),
+	new QuordleAdapter(),
+	new OctordleAdapter(),
+	new SedecordleAdapter(),
+	new HurdleAdapter(),
+	new AbsurdleAdapter(),
+	new EvilWordleAdapter(),
+	new KilordleAdapter(),
+	new LingleAdapter()
+];
 /**
-* Get tile state from a DOM element.
+* Automatically detects and returns the matching GameAdapter for the current website.
+* Returns null if the website is not a supported Wordle clone.
 */
-function getTileState(tile) {
-	if (isWordleName()) {
-		const evaluation = tile.getAttribute("evaluation");
-		if (evaluation) return evaluation;
-		const letter = tile.getAttribute("letter");
-		if (letter && letter !== "null" && letter !== "") return TILE_STATES.tbd;
-		return TILE_STATES.empty;
-	}
-	return tile.getAttribute(DATA_ATTRS.tileState) || TILE_STATES.empty;
-}
-/**
-* Get tile letter from a DOM element.
-*/
-function getTileLetter(tile) {
-	if (isWordleName()) {
-		const letter = tile.getAttribute("letter");
-		return (letter && letter !== "null" ? letter : "").toUpperCase();
-	}
-	return (tile.getAttribute(DATA_ATTRS.tileLetter) || tile.textContent?.trim() || "").toUpperCase();
+function detectActiveAdapter() {
+	for (const adapter of ALL_ADAPTERS) try {
+		if (adapter.detectGame()) return adapter;
+	} catch {}
+	return null;
 }
 //#endregion
 //#region extension/src/content/content.ts
 var DEFAULT_TYPING_DELAY = 120;
 var typingDelay = DEFAULT_TYPING_DELAY;
-function readBoardState() {
-	const tiles = findAllTiles();
-	const rows = [];
-	for (let r = 0; r < 6; r++) {
-		const row = [];
-		for (let c = 0; c < 5; c++) {
-			const tile = tiles[r * 5 + c];
-			if (tile) row.push({
-				letter: getTileLetter(tile),
-				state: getTileState(tile)
-			});
-			else row.push({
-				letter: "",
-				state: TILE_STATES.empty
-			});
-		}
-		rows.push(row);
-	}
-	let currentRow = 6;
-	for (let r = 0; r < 6; r++) {
-		const rowStates = rows[r].map((t) => t.state);
-		const isEvaluated = rowStates.every((s) => s === "correct" || s === "present" || s === "absent");
-		const isEmpty = rowStates.every((s) => s === "empty");
-		const hasTbd = rowStates.some((s) => s === "tbd");
-		if (isEmpty || hasTbd) {
-			currentRow = r;
-			break;
-		}
-		if (!isEvaluated) {
-			currentRow = r;
-			break;
-		}
-	}
-	let gameStatus = "playing";
-	try {
-		if (window.location.hostname.includes("wordleunlimited.org")) {
-			const stored = JSON.parse(localStorage.getItem("gameState") || "{}");
-			if (stored.gameStatus === "WIN") gameStatus = "won";
-			else if (stored.gameStatus === "FAIL") gameStatus = "lost";
-		} else {
-			const stateKey = Object.keys(localStorage).find((k) => k.includes("wordle") && k.includes("state"));
-			if (stateKey) {
-				const stored = JSON.parse(localStorage.getItem(stateKey) || "{}");
-				if (stored.gameStatus === "WIN") gameStatus = "won";
-				else if (stored.gameStatus === "FAIL") gameStatus = "lost";
-			}
-		}
-	} catch {
-		if (currentRow > 0) {
-			if (rows[currentRow - 1]?.every((t) => t.state === "correct")) gameStatus = "won";
-			else if (currentRow >= 6) gameStatus = "lost";
-		}
-	}
-	return {
-		rows,
-		currentRow,
-		gameStatus
-	};
-}
-function sleep(ms) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function simulateKeyPress(key) {
-	const isEnter = key === "Enter";
-	const isBackspace = key === "Backspace";
-	const keyUpper = key.toUpperCase();
-	const eventInit = {
-		key,
-		code: isEnter ? "Enter" : isBackspace ? "Backspace" : `Key${keyUpper}`,
-		keyCode: isEnter ? 13 : isBackspace ? 8 : keyUpper.charCodeAt(0),
-		which: isEnter ? 13 : isBackspace ? 8 : keyUpper.charCodeAt(0),
-		bubbles: true,
-		cancelable: true
-	};
-	const keydownEvent = new KeyboardEvent("keydown", eventInit);
-	document.dispatchEvent(keydownEvent);
-	if (!isBackspace) {
-		const keypressEvent = new KeyboardEvent("keypress", eventInit);
-		document.dispatchEvent(keypressEvent);
-	}
-	const keyupEvent = new KeyboardEvent("keyup", eventInit);
-	document.dispatchEvent(keyupEvent);
-}
-async function typeWord(word, delay) {
-	for (const letter of word.toLowerCase()) {
-		simulateKeyPress(letter);
-		await sleep(delay);
-	}
-}
-async function submitGuess() {
-	simulateKeyPress("Enter");
-}
-function isRowInvalid(rowIndex) {
-	let rows = [];
-	const gameApp = document.querySelector("game-app");
-	if (gameApp?.shadowRoot) rows = Array.from(gameApp.shadowRoot.querySelectorAll("game-row"));
-	else rows = Array.from(document.querySelectorAll("game-row"));
-	if (rows[rowIndex]?.hasAttribute("invalid")) return true;
-	const nytRows = document.querySelectorAll("[role=\"group\"][aria-label*=\"Row\"]");
-	if (nytRows[rowIndex]) {
-		const className = nytRows[rowIndex].className.toLowerCase();
-		if (className.includes("invalid") || className.includes("shake")) return true;
-	}
-	const toasts = Array.from(document.querySelectorAll("game-toast, [class*=\"toast\"]"));
-	for (const toast of toasts) {
-		const text = toast.textContent?.toLowerCase() || "";
-		if (text.includes("not in word list") || text.includes("not in") || text.includes("invalid")) return true;
-	}
-	return false;
-}
-async function clearInvalidGuess() {
-	for (let i = 0; i < 5; i++) {
-		simulateKeyPress("Backspace");
-		await sleep(60);
-	}
-}
-function waitForReveal(rowIndex) {
-	return new Promise((resolve, reject) => {
-		const checkInterval = setInterval(() => {
-			if (isRowInvalid(rowIndex)) {
-				clearInterval(checkInterval);
-				clearTimeout(timeout);
-				observer.disconnect();
-				clearInvalidGuess().then(() => {
-					reject(/* @__PURE__ */ new Error("NOT_IN_WORD_LIST"));
-				});
-			}
-		}, 150);
-		const timeout = setTimeout(() => {
-			clearInterval(checkInterval);
-			observer.disconnect();
-			const results = readRowResults(rowIndex);
-			if (results) resolve(results);
-			else reject(/* @__PURE__ */ new Error("Tile reveal timeout"));
-		}, 5e3);
-		const rowTiles = findAllTiles().slice(rowIndex * 5, rowIndex * 5 + 5);
-		const existing = readRowResults(rowIndex);
-		if (existing) {
-			clearInterval(checkInterval);
-			clearTimeout(timeout);
-			resolve(existing);
-			return;
-		}
-		const observer = new MutationObserver(() => {
-			const results = readRowResults(rowIndex);
-			if (results) {
-				clearInterval(checkInterval);
-				clearTimeout(timeout);
-				observer.disconnect();
-				resolve(results);
-			}
-		});
-		const attributeFilter = [
-			"data-state",
-			"evaluation",
-			"reveal"
-		];
-		for (const tile of rowTiles) observer.observe(tile, {
-			attributes: true,
-			attributeFilter
-		});
-		if (rowTiles[0]?.parentElement) observer.observe(rowTiles[0].parentElement, {
-			childList: true,
-			subtree: true,
-			attributes: true,
-			attributeFilter
-		});
-	});
-}
-function readRowResults(rowIndex) {
-	const rowTiles = findAllTiles().slice(rowIndex * 5, rowIndex * 5 + 5);
-	const results = [];
-	for (const tile of rowTiles) {
-		const state = getTileState(tile);
-		const letter = getTileLetter(tile);
-		if (state === "correct" || state === "present" || state === "absent") results.push({
-			letter,
-			state
-		});
-		else return null;
-	}
-	return results.length === 5 ? results : null;
-}
 var currentMode = "auto";
-var assistLoopActive = false;
-async function startAssistLoop(startRow) {
-	if (assistLoopActive) return;
-	assistLoopActive = true;
-	let r = startRow;
-	while (currentMode === "assist" && r < 6) try {
-		await waitForReveal(r);
-		await sleep(300);
-		if (currentMode !== "assist") break;
-		updateBadge("🧠 Thinking...");
-		if ((await new Promise((resolve) => {
-			chrome.runtime.sendMessage({
-				type: "START_SOLVER",
-				mode: "assist"
-			}, (res) => {
-				if (chrome.runtime.lastError) resolve({
-					success: false,
-					error: chrome.runtime.lastError.message
-				});
-				else resolve(res);
-			});
-		}))?.success) {
-			const stateResponse = await new Promise((resolve) => {
-				chrome.runtime.sendMessage({ type: "GET_STATE" }, (res) => {
-					if (chrome.runtime.lastError) resolve({ success: false });
-					else resolve(res);
-				});
-			});
-			if (stateResponse?.success && stateResponse.data) {
-				const state = stateResponse.data;
-				if (state.currentGuess) updateBadge(`💡 Rec: ${state.currentGuess}`);
-				else updateBadge("💡 No Rec");
-				r = state.currentRow;
-			} else break;
-		} else break;
-	} catch (err) {
-		if (err.message === "NOT_IN_WORD_LIST") continue;
-		await sleep(1e3);
+var activeAdapter = detectActiveAdapter();
+var assistLoopTimeout = null;
+function stopAssistLoop() {
+	if (assistLoopTimeout !== null) {
+		window.clearTimeout(assistLoopTimeout);
+		assistLoopTimeout = null;
 	}
-	assistLoopActive = false;
 }
 function updateBadgeModeIndicator() {
-	const badge = document.getElementById("wordle-solver-badge");
-	if (badge) {
-		const txt = badge.textContent || "";
-		if (txt === "🧠 Solver Ready" || txt === "🤝 Assist Ready" || txt.startsWith("💡 Rec:") || txt === "💡 No Rec" || txt === "🧠 Thinking...") badge.textContent = currentMode === "auto" ? "🧠 Solver Ready" : "🤝 Assist Ready";
-	}
-	const autoItem = document.getElementById("wordle-solver-item-auto");
-	const assistItem = document.getElementById("wordle-solver-item-assist");
-	if (autoItem && assistItem) if (currentMode === "auto") {
-		autoItem.classList.add("active");
-		assistItem.classList.remove("active");
-	} else {
-		autoItem.classList.remove("active");
-		assistItem.classList.add("active");
-	}
+	updateBadge(`${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"} | ${activeAdapter ? activeAdapter.info.name : "UNSUPPORTED"}`);
 }
 function createStatusBadge() {
+	const existing = document.getElementById("wordle-solver-badge-wrapper");
+	if (existing) existing.remove();
 	const wrapper = document.createElement("div");
-	wrapper.id = "wordle-solver-wrapper";
+	wrapper.id = "wordle-solver-badge-wrapper";
+	wrapper.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  `;
 	const badge = document.createElement("div");
 	badge.id = "wordle-solver-badge";
-	badge.textContent = currentMode === "auto" ? "🧠 Solver Ready" : "🤝 Assist Ready";
+	const isSupported = activeAdapter !== null;
+	badge.textContent = isSupported ? `${currentMode === "auto" ? "⚡ AUTO" : "💡 ASSIST"} | ${activeAdapter.info.name}` : "⚠️ UNSUPPORTED SITE";
+	badge.style.cssText = `
+    background: ${isSupported ? "#000000" : "#b91c1c"};
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 8px 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+  `;
 	const menuBtn = document.createElement("button");
 	menuBtn.id = "wordle-solver-menu-btn";
 	menuBtn.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-      <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
-      <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
+  `;
+	menuBtn.style.cssText = `
+    background: ${isSupported ? "#18181b" : "#991b1b"};
+    color: #ffffff;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   `;
 	const dropdown = document.createElement("div");
 	dropdown.id = "wordle-solver-dropdown";
-	const autoItem = document.createElement("div");
-	autoItem.id = "wordle-solver-item-auto";
-	autoItem.className = `wordle-solver-dropdown-item${currentMode === "auto" ? " active" : ""}`;
-	autoItem.innerHTML = `
-    <span class="icon">🤖</span>
-    <span class="label">Auto Solver</span>
-    <span class="check">✓</span>
+	dropdown.style.cssText = `
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+    background: #ffffff;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    min-width: 170px;
   `;
-	autoItem.addEventListener("click", (e) => {
-		e.stopPropagation();
-		currentMode = "auto";
-		chrome.storage.local.set({ solverMode: "auto" });
-		updateBadgeModeIndicator();
-		dropdown.classList.remove("show");
+	[{
+		id: "auto",
+		label: "⚡ Auto-Solve",
+		desc: "Types & solves automatically"
+	}, {
+		id: "assist",
+		label: "💡 Assist Mode",
+		desc: "Shows recommendations only"
+	}].forEach((mode) => {
+		const item = document.createElement("div");
+		item.style.cssText = `
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: background 0.15s ease;
+      background: ${currentMode === mode.id ? "#f4f4f5" : "transparent"};
+    `;
+		const label = document.createElement("span");
+		label.textContent = mode.label;
+		label.style.cssText = "font-size: 12px; font-weight: 700; color: #000000;";
+		const desc = document.createElement("span");
+		desc.textContent = mode.desc;
+		desc.style.cssText = "font-size: 10px; color: #71717a;";
+		item.appendChild(label);
+		item.appendChild(desc);
+		item.addEventListener("click", (e) => {
+			e.stopPropagation();
+			currentMode = mode.id;
+			chrome.storage.local.set({ solverMode: currentMode });
+			if (currentMode === "auto") stopAssistLoop();
+			updateBadgeModeIndicator();
+			dropdown.classList.remove("show");
+		});
+		dropdown.appendChild(item);
 	});
-	const assistItem = document.createElement("div");
-	assistItem.id = "wordle-solver-item-assist";
-	assistItem.className = `wordle-solver-dropdown-item${currentMode === "assist" ? " active" : ""}`;
-	assistItem.innerHTML = `
-    <span class="icon">🤝</span>
-    <span class="label">Assist Mode</span>
-    <span class="check">✓</span>
-  `;
-	assistItem.addEventListener("click", (e) => {
-		e.stopPropagation();
-		currentMode = "assist";
-		chrome.storage.local.set({ solverMode: "assist" });
-		updateBadgeModeIndicator();
-		dropdown.classList.remove("show");
-	});
-	dropdown.appendChild(autoItem);
-	dropdown.appendChild(assistItem);
 	menuBtn.addEventListener("click", (e) => {
 		e.stopPropagation();
 		dropdown.classList.toggle("show");
 	});
 	badge.addEventListener("click", () => {
+		if (!activeAdapter) {
+			updateBadge("⚠️ UNSUPPORTED VARIANT");
+			return;
+		}
 		chrome.runtime.sendMessage({ type: "GET_STATE" }, (response) => {
-			if (chrome.runtime.lastError) {
-				console.error("Failed to get state:", chrome.runtime.lastError);
-				return;
-			}
+			if (chrome.runtime.lastError) return;
 			if (response?.success && response.data) if (response.data.isRunning) chrome.runtime.sendMessage({ type: "STOP_SOLVER" });
-			else {
-				if (currentMode === "assist") updateBadge("🧠 Thinking...");
-				chrome.runtime.sendMessage({
-					type: "START_SOLVER",
-					mode: currentMode
-				}, (startResponse) => {
-					if (chrome.runtime.lastError) {
-						console.error("Failed to start solver from badge:", chrome.runtime.lastError);
-						updateBadgeModeIndicator();
-						return;
-					}
-					if (!startResponse?.success) {
-						console.error("Failed to start solver from badge:", startResponse?.error);
-						updateBadgeModeIndicator();
-					} else if (currentMode === "assist") chrome.runtime.sendMessage({ type: "GET_STATE" }, (stateResponse) => {
-						if (stateResponse?.success && stateResponse.data) {
-							const state = stateResponse.data;
-							if (state.currentGuess) {
-								updateBadge(`💡 Rec: ${state.currentGuess}`);
-								startAssistLoop(state.currentRow);
-							} else updateBadge("💡 No Rec");
-						}
-					});
-				});
-			}
+			else chrome.runtime.sendMessage({
+				type: "START_SOLVER",
+				mode: currentMode
+			});
 		});
 	});
 	document.addEventListener("click", (e) => {
@@ -434,32 +1362,54 @@ function updateBadge(text) {
 }
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	const handler = async () => {
+		if (!activeAdapter) {
+			if (message.type === "PING") sendResponse({
+				success: true,
+				isSupported: false,
+				error: "Unsupported Website"
+			});
+			else sendResponse({
+				success: false,
+				error: "Unsupported Website: This Wordle variant is not supported yet."
+			});
+			return;
+		}
 		switch (message.type) {
-			case "START_ASSIST_LOOP":
-				startAssistLoop(message.currentRow);
-				sendResponse({ success: true });
-				break;
-			case "READ_BOARD":
+			case "GET_GAME_INFO":
 				sendResponse({
 					success: true,
-					data: readBoardState()
+					gameInfo: activeAdapter.info
 				});
 				break;
-			case "TYPE_WORD": {
+			case "READ_BOARD": {
+				const boardIdx = message.boardIndex || 0;
+				sendResponse({
+					success: true,
+					data: activeAdapter.readBoard(boardIdx),
+					gameInfo: activeAdapter.info
+				});
+				break;
+			}
+			case "READ_ALL_BOARDS":
+				sendResponse({
+					success: true,
+					data: activeAdapter.readAllBoards(),
+					gameInfo: activeAdapter.info
+				});
+				break;
+			case "TYPE_WORD":
+			case "SUBMIT_GUESS": {
 				const delay = message.delay ?? typingDelay;
-				await typeWord(message.word, delay);
+				await activeAdapter.submitGuess(message.word || "", delay);
 				sendResponse({ success: true });
 				break;
 			}
-			case "SUBMIT_GUESS":
-				await submitGuess();
-				sendResponse({ success: true });
-				break;
 			case "WAIT_REVEAL":
 				try {
+					const boardIdx = message.boardIndex || 0;
 					sendResponse({
 						success: true,
-						data: await waitForReveal(message.row)
+						data: await activeAdapter.waitForReveal(boardIdx, message.row)
 					});
 				} catch (err) {
 					sendResponse({
@@ -467,6 +1417,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 						error: String(err)
 					});
 				}
+				break;
+			case "RESET_GAME":
+				if (activeAdapter.reset) await activeAdapter.reset();
+				sendResponse({ success: true });
 				break;
 			case "SET_TYPING_DELAY":
 				typingDelay = message.delay ?? DEFAULT_TYPING_DELAY;
@@ -479,7 +1433,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 			case "PING":
 				sendResponse({
 					success: true,
-					data: "pong"
+					data: "pong",
+					isSupported: true,
+					gameInfo: activeAdapter.info
 				});
 				break;
 			default: sendResponse({
@@ -491,7 +1447,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	handler();
 	return true;
 });
-console.log("[Wordle Solver] Content script loaded on", window.location.href);
 if (window.location.hostname.includes("localhost") || window.location.hostname.includes("vercel.app") || window.location.pathname.endsWith("/check")) {
 	document.documentElement.dataset.wordleEntropySolverInstalled = "true";
 	window.dispatchEvent(new CustomEvent("WORDLE_SOLVER_INSTALLED"));

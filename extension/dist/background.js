@@ -11897,17 +11897,24 @@ function onSolverUpdate(update) {
 	chrome.runtime.sendMessage(message).catch(() => {});
 }
 async function findWordleTab() {
-	let tabs = await chrome.tabs.query({ url: "https://www.nytimes.com/games/wordle/*" });
-	if (tabs.length > 0 && tabs[0].id) return tabs[0].id;
-	tabs = await chrome.tabs.query({ url: ["https://wordleunlimited.org/*", "https://*.wordleunlimited.org/*"] });
-	if (tabs.length > 0 && tabs[0].id) return tabs[0].id;
+	const [activeTab] = await chrome.tabs.query({
+		active: true,
+		currentWindow: true
+	});
+	if (activeTab && activeTab.id) return activeTab.id;
+	const tabs = await chrome.tabs.query({ lastFocusedWindow: true });
+	for (const tab of tabs) if (tab.id) return tab.id;
 	return null;
 }
 async function pingContentScript(tabId) {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage(tabId, { type: "PING" }, (response) => {
-			if (chrome.runtime.lastError || !response?.success) resolve(false);
-			else resolve(true);
+			if (chrome.runtime.lastError || !response?.success) resolve({ alive: false });
+			else resolve({
+				alive: true,
+				isSupported: response.isSupported,
+				gameInfo: response.gameInfo
+			});
 		});
 	});
 }
@@ -11919,7 +11926,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				if (!tabId) {
 					sendResponse({
 						success: false,
-						error: "No NYT Wordle tab found. Open https://www.nytimes.com/games/wordle first."
+						error: "No active Wordle tab found. Open a supported Wordle game page first."
 					});
 					return;
 				}
@@ -11927,10 +11934,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 					sendResponse({ success: true });
 					return;
 				}
-				if (!await pingContentScript(tabId)) {
+				const status = await pingContentScript(tabId);
+				if (!status.alive) {
 					sendResponse({
 						success: false,
-						error: "Content script not responding. Refresh the Wordle page and try again."
+						error: "Content script not responding. Refresh the page and try again."
+					});
+					return;
+				}
+				if (status.isSupported === false) {
+					sendResponse({
+						success: false,
+						error: "Unsupported Website: This Wordle variant is not supported yet."
 					});
 					return;
 				}

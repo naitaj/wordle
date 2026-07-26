@@ -24,6 +24,7 @@ export function Popup() {
   });
   const [error, setError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const [gameInfo, setGameInfo] = useState<{ id: string; name: string; boardCount: number } | null>(null);
 
   // Load configuration and active state on mount
   useEffect(() => {
@@ -34,7 +35,19 @@ export function Popup() {
       }
     });
 
-    // 2. Get initial state
+    // 2. Query active tab for detected game info
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_GAME_INFO' }, (response) => {
+          if (chrome.runtime.lastError) return;
+          if (response?.success && response.gameInfo) {
+            setGameInfo(response.gameInfo);
+          }
+        });
+      }
+    });
+
+    // 3. Get initial state
     chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
       if (response?.success && response.data) {
         const data = response.data;
@@ -340,6 +353,18 @@ export function Popup() {
             <div className="p-3 bg-rose-50 border-2 border-rose-600 text-rose-800 text-xs font-bold flex flex-col gap-0.5 animate-shake">
               <span className="uppercase tracking-wider text-[9px] text-rose-600">Error Encountered</span>
               <span>{error}</span>
+            </div>
+          )}
+
+          {/* Active Game Detected Banner */}
+          {gameInfo && (
+            <div className="px-3 py-2 bg-emerald-50 border-2 border-emerald-600 rounded-lg flex items-center justify-between text-black">
+              <span className="font-bebas text-sm tracking-wide flex items-center gap-1.5">
+                🎮 {gameInfo.name}
+              </span>
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-emerald-600 text-white rounded">
+                {gameInfo.boardCount > 1 ? `${gameInfo.boardCount} Boards` : 'Single Board'}
+              </span>
             </div>
           )}
 

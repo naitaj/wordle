@@ -108,28 +108,26 @@ function onSolverUpdate(update: Partial<SolverState> & { isRunning: boolean; mod
 // ─── Find Active Wordle Tab ───
 
 async function findWordleTab(): Promise<number | null> {
-  // Try finding NYT Wordle tab first
-  let tabs = await chrome.tabs.query({ url: 'https://www.nytimes.com/games/wordle/*' });
-  if (tabs.length > 0 && tabs[0].id) {
-    return tabs[0].id;
+  const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (activeTab && activeTab.id) {
+    return activeTab.id;
   }
-  // Try finding Wordle Unlimited tab
-  tabs = await chrome.tabs.query({ url: ['https://wordleunlimited.org/*', 'https://*.wordleunlimited.org/*'] });
-  if (tabs.length > 0 && tabs[0].id) {
-    return tabs[0].id;
+  const tabs = await chrome.tabs.query({ lastFocusedWindow: true });
+  for (const tab of tabs) {
+    if (tab.id) return tab.id;
   }
   return null;
 }
 
 // ─── Verify Content Script is Loaded ───
 
-async function pingContentScript(tabId: number): Promise<boolean> {
+async function pingContentScript(tabId: number): Promise<{ alive: boolean; isSupported?: boolean; gameInfo?: any }> {
   return new Promise(resolve => {
     chrome.tabs.sendMessage(tabId, { type: 'PING' }, (response) => {
       if (chrome.runtime.lastError || !response?.success) {
-        resolve(false);
+        resolve({ alive: false });
       } else {
-        resolve(true);
+        resolve({ alive: true, isSupported: response.isSupported, gameInfo: response.gameInfo });
       }
     });
   });
@@ -143,7 +141,7 @@ chrome.runtime.onMessage.addListener((message: PopupMessage, sender, sendRespons
       case 'START_SOLVER': {
         const tabId = await findWordleTab();
         if (!tabId) {
-          sendResponse({ success: false, error: 'No NYT Wordle tab found. Open https://www.nytimes.com/games/wordle first.' });
+          sendResponse({ success: false, error: 'No active Wordle tab found. Open a supported Wordle game page first.' });
           return;
         }
 
@@ -153,10 +151,15 @@ chrome.runtime.onMessage.addListener((message: PopupMessage, sender, sendRespons
           return;
         }
 
-        // Verify content script is loaded
-        const alive = await pingContentScript(tabId);
-        if (!alive) {
-          sendResponse({ success: false, error: 'Content script not responding. Refresh the Wordle page and try again.' });
+        // Verify content script is loaded & game is supported
+        const status = await pingContentScript(tabId);
+        if (!status.alive) {
+          sendResponse({ success: false, error: 'Content script not responding. Refresh the page and try again.' });
+          return;
+        }
+
+        if (status.isSupported === false) {
+          sendResponse({ success: false, error: 'Unsupported Website: This Wordle variant is not supported yet.' });
           return;
         }
 

@@ -1,90 +1,110 @@
 # Wordle Entropy Solver
 
-Wordle Entropy Solver is a browser extension and companion website that helps users solve Wordle puzzles using information theory. The extension calculates Shannon entropy to find the guess that eliminates the most remaining words. It works on the official New York Times Wordle page and the wordleunlimited.org clone.
+Wordle Entropy Solver is an autonomous AI-powered browser extension and companion website that helps users solve Wordle puzzles using information theory (Shannon Entropy). The extension calculates expected information gain to find guesses that eliminate the maximum possible candidate words per turn.
 
-## Overview
+---
 
-The extension runs in two modes:
+## Supported Wordle Games & Clones
 
-* **Auto Solve:** Reads the game board, selects the optimal guess, types it in, and submits it. It repeats this until the game ends.
-* **Assist Mode:** Suggests the highest-information words on the side, updating recommendations in real time as you enter guesses manually.
+The extension features a **Modular Game Adapter Architecture** that automatically detects and adapts to 11+ different Wordle variants:
 
-The companion website acts as the central hub for the project, allowing users to learn how the extension works, download it, and verify that it is correctly installed.
+### Tier 1 Variants
+| Game | URL / Host | Boards | Mode |
+|---|---|---|---|
+| **Official NYT Wordle** | `nytimes.com/games/wordle` | 1 | Auto-Solve & Assist |
+| **Wordle Unlimited** | `wordleunlimited.org` | 1 | Auto-Solve & Assist |
+| **Hello Wordl** | `hellowordl.net` | 1 | Auto-Solve & Assist |
+| **Dordle** | `dordle.io` | 2 Simultaneous | Auto-Solve & Assist |
+| **Quordle** | `quordle.com` | 4 Simultaneous | Auto-Solve & Assist |
+| **Octordle** | `octordle.com` | 8 Simultaneous | Auto-Solve & Assist |
+| **Sedecordle** | `sedecordle.com` | 16 Simultaneous | Auto-Solve & Assist |
+| **Hurdle** | `arkadium.com/games/hurdle` | Multi-Round | Auto-Solve & Assist |
 
-## Extension Features
+### Tier 2 Variants
+| Game | URL / Host | Type | Mode |
+|---|---|---|---|
+| **Absurdle** | `qntm.org/files/absurdle` | Adversarial | Auto-Solve & Assist |
+| **Evil Wordle** | `swag.github.io/evil-wordle` | Adaptive Feedback | Auto-Solve & Assist |
+| **Kilordle** | `kilordle.com` | 1000 Sequential Boards | Auto-Solve & Assist |
+| **Lingle** | `lingle.today` | Custom Layout | Auto-Solve & Assist |
 
-* **Entropy Calculations:** Evaluates guesses by how evenly they partition the remaining possible answers.
-* **Exploratory Guesses:** Automatically plays search words when appropriate to eliminate multiple letters quickly.
-* **LLM Fallback:** Integrates with the Groq API using LLaMA 3 to handle custom word scenarios where the solver is left with zero candidate words.
-* **Industrial Design:** Compact 320x600px sidebar user interface matching the NYT branding and Braun industrial aesthetics.
+---
 
-## Browser Compatibility
+## Modular Adapter Architecture
 
-The extension is designed for Chromium-based desktop browsers:
+Instead of hardcoding DOM logic inside the solver, all site-specific interaction is isolated into `/extension/src/adapters/`.
 
-* Google Chrome
-* Microsoft Edge
-* Brave Browser
+```
+/extension/src/adapters
+  ├── types.ts           # GameAdapter interface & data structures
+  ├── adapterRegistry.ts # Domain auto-detection & adapter factory
+  ├── nyt.ts             # NYT & Wordle Unlimited adapter
+  ├── hellowordl.ts      # Hello Wordl adapter
+  ├── dordle.ts          # Dordle 2-board adapter
+  ├── quordle.ts         # Quordle 4-board adapter
+  ├── octordle.ts        # Octordle 8-board adapter
+  ├── sedecordle.ts      # Sedecordle 16-board adapter
+  ├── hurdle.ts          # Hurdle multi-round adapter
+  ├── absurdle.ts        # Absurdle adversarial adapter
+  ├── evilwordle.ts      # Evil Wordle adapter
+  ├── kilordle.ts        # Kilordle sequential adapter
+  └── lingle.ts          # Lingle adapter
+```
 
-It does not support mobile browsers directly, which is why the companion website provides a verification check to confirm successful desktop installation.
+### GameAdapter Interface
 
-## Website Structure
+Every adapter implements the standard `GameAdapter` contract:
 
-The project includes a multi-page React application at the root directory:
+```typescript
+export interface GameAdapter {
+  info: GameInfo;
+  detectGame(): boolean;
+  readBoard(boardIndex?: number): BoardState;
+  readAllBoards(): BoardState[];
+  submitGuess(word: string, delay: number): Promise<void>;
+  waitForReveal(boardIndex: number, rowIndex: number): Promise<TileData[]>;
+  getKeyboardState(): KeyboardState;
+  isGameFinished(): boolean;
+  reset?(): Promise<void>;
+}
+```
 
-* **Home:** Details the solver mechanics with an animated walkthrough of the solving process.
-* **Download:** Direct link to the extension build files.
-* **Install Guide:** A step-by-step walkthrough covering dependency setup and loading unpacked extension files.
-* **Check Installation:** Uses Chrome runtime messaging to verify if the extension has been loaded and is active in the user's browser.
-* **FAQ:** Explanations of entropy, browser limitations, and offline privacy details.
+The entropy engine never needs to know which game is active. It interacts solely with the generic `GameAdapter` interface.
 
-## Setting Up and Running the Project
+---
 
-### Installation Instructions
+## Adding Support for Future Wordle Clones
 
-To install and run the extension locally:
+To add a new Wordle clone:
 
-1. Clone this repository.
-   ```bash
-   git clone https://github.com/naitaj/wordle.git
-   cd wordle
-   ```
+1. Create a new file in `extension/src/adapters/myclone.ts` implementing `GameAdapter`.
+2. Register the adapter in `extension/src/adapters/adapterRegistry.ts`.
+3. Add the match URL pattern to `extension/manifest.json` under `host_permissions` and `content_scripts[0].matches`.
+4. Rebuild the extension with `node extension/build.js`.
 
-2. Install the package dependencies.
-   ```bash
-   npm install
-   ```
+---
 
-3. Build the extension.
-   ```bash
-   node extension/build.js
-   ```
-   This generates the compiled content scripts and popup inside the `extension/dist` folder.
+## Development & Building
 
-4. Load the unpacked extension in your browser:
-   * Open `chrome://extensions/` in Chrome or the equivalent in Edge or Brave.
-   * Enable "Developer Mode" in the top-right corner.
-   * Click "Load unpacked" in the top-left corner.
-   * Select the `extension/dist` directory.
+### Build the Extension
+```bash
+node extension/build.js
+```
+The compiled unpacked Chrome Extension files are emitted to `extension/dist/`.
 
-### Development and Website Instructions
+### Load Unpacked Extension in Chrome
+1. Navigate to `chrome://extensions/`
+2. Toggle **Developer Mode** ON in the top-right corner.
+3. Click **Load unpacked** in the top-left corner.
+4. Select the `extension/dist` directory.
 
-To run the companion website locally for development:
-
+### Run Website Locally
 ```bash
 npm run dev
 ```
 
-This starts the Vite local server (usually at `http://localhost:5173` or `http://localhost:5174`).
-
-To build the website for production:
-
-```bash
-npm run build
-```
-
-This compiles the website assets into the root `dist` folder.
+---
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License
