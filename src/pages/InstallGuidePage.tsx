@@ -87,7 +87,7 @@ export const InstallGuidePage = () => {
       title: 'OPEN CHROME EXTENSIONS',
       desc: 'CLICK TO COPY "chrome://extensions" ADDRESS AND PASTE IT IN A NEW TAB.',
       code: 'chrome://extensions',
-      actionLabel: 'COPY URL & VIEW INSTRUCTIONS'
+      actionLabel: 'VIEW INSTRUCTIONS'
     },
     {
       id: 3,
@@ -430,7 +430,7 @@ export const InstallGuidePage = () => {
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                     {step.id === 2
-                      ? (isStep2Expanded ? 'COLLAPSE INSTRUCTIONS' : 'COPY URL & VIEW INSTRUCTIONS')
+                      ? (isStep2Expanded ? 'COLLAPSE INSTRUCTIONS' : 'VIEW INSTRUCTIONS')
                       : step.id === 3 
                       ? (isStep3Expanded ? 'COLLAPSE DETAILED INSTRUCTIONS' : 'VIEW DETAILED INSTRUCTIONS') 
                       : step.actionLabel
