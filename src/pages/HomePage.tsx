@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -16,19 +16,76 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
 };
 
-// Demo simulation data: each guess has a word and tile colors
-const DEMO_GUESSES = [
-  { word: 'CRANE', colors: ['absent', 'absent', 'present', 'absent', 'correct'] },
-  { word: 'STALE', colors: ['correct', 'absent', 'present', 'absent', 'correct'] },
-  { word: 'SHAPE', colors: ['correct', 'correct', 'correct', 'absent', 'correct'] },
-  { word: 'SHADE', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
-];
-
-const DEMO_STATS = [
-  { guess: 'CRANE', entropy: '5.74', wordsLeft: '2309' },
-  { guess: 'STALE', entropy: '4.12', wordsLeft: '84' },
-  { guess: 'SHAPE', entropy: '2.58', wordsLeft: '6' },
-  { guess: 'SHADE', entropy: '0.00', wordsLeft: '1' },
+// Demo simulation data: multiple puzzles to cycle through
+const DEMO_PUZZLES = [
+  {
+    guesses: [
+      { word: 'CRANE', colors: ['absent', 'absent', 'present', 'absent', 'correct'] },
+      { word: 'STALE', colors: ['correct', 'absent', 'present', 'absent', 'correct'] },
+      { word: 'SHAPE', colors: ['correct', 'correct', 'correct', 'absent', 'correct'] },
+      { word: 'SHADE', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
+    ],
+    stats: [
+      { guess: 'CRANE', entropy: '5.74', wordsLeft: '2309' },
+      { guess: 'STALE', entropy: '4.12', wordsLeft: '84' },
+      { guess: 'SHAPE', entropy: '2.58', wordsLeft: '6' },
+      { guess: 'SHADE', entropy: '0.00', wordsLeft: '1' },
+    ],
+  },
+  {
+    guesses: [
+      { word: 'SALET', colors: ['absent', 'absent', 'absent', 'absent', 'absent'] },
+      { word: 'CORGI', colors: ['correct', 'absent', 'correct', 'absent', 'correct'] },
+      { word: 'CURVI', colors: ['correct', 'absent', 'correct', 'absent', 'correct'] },
+      { word: 'CRIMP', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
+    ],
+    stats: [
+      { guess: 'SALET', entropy: '5.88', wordsLeft: '2309' },
+      { guess: 'CORGI', entropy: '3.91', wordsLeft: '121' },
+      { guess: 'CURVI', entropy: '2.32', wordsLeft: '8' },
+      { guess: 'CRIMP', entropy: '0.00', wordsLeft: '1' },
+    ],
+  },
+  {
+    guesses: [
+      { word: 'TRACE', colors: ['absent', 'absent', 'absent', 'absent', 'absent'] },
+      { word: 'LOUSY', colors: ['absent', 'absent', 'present', 'absent', 'absent'] },
+      { word: 'WHUNG', colors: ['absent', 'absent', 'correct', 'absent', 'absent'] },
+      { word: 'BLUNT', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
+    ],
+    stats: [
+      { guess: 'TRACE', entropy: '5.63', wordsLeft: '2309' },
+      { guess: 'LOUSY', entropy: '4.08', wordsLeft: '97' },
+      { guess: 'WHUNG', entropy: '2.14', wordsLeft: '5' },
+      { guess: 'BLUNT', entropy: '0.00', wordsLeft: '1' },
+    ],
+  },
+  {
+    guesses: [
+      { word: 'RAISE', colors: ['absent', 'absent', 'absent', 'absent', 'correct'] },
+      { word: 'CONTE', colors: ['absent', 'present', 'absent', 'absent', 'correct'] },
+      { word: 'GOUGE', colors: ['absent', 'correct', 'absent', 'absent', 'correct'] },
+      { word: 'FORGE', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
+    ],
+    stats: [
+      { guess: 'RAISE', entropy: '5.88', wordsLeft: '2309' },
+      { guess: 'CONTE', entropy: '3.45', wordsLeft: '68' },
+      { guess: 'GOUGE', entropy: '1.58', wordsLeft: '4' },
+      { guess: 'FORGE', entropy: '0.00', wordsLeft: '1' },
+    ],
+  },
+  {
+    guesses: [
+      { word: 'SLATE', colors: ['absent', 'present', 'absent', 'absent', 'absent'] },
+      { word: 'CURLY', colors: ['absent', 'present', 'absent', 'present', 'absent'] },
+      { word: 'PLUMB', colors: ['correct', 'correct', 'correct', 'correct', 'correct'] },
+    ],
+    stats: [
+      { guess: 'SLATE', entropy: '5.82', wordsLeft: '2309' },
+      { guess: 'CURLY', entropy: '3.67', wordsLeft: '42' },
+      { guess: 'PLUMB', entropy: '0.00', wordsLeft: '1' },
+    ],
+  },
 ];
 
 const COLOR_MAP: Record<string, string> = {
@@ -55,12 +112,17 @@ const WordleDemo = () => {
   const [currentStats, setCurrentStats] = useState({ guess: '—', entropy: '—', wordsLeft: '2309' });
   const [solvedMsg, setSolvedMsg] = useState(false);
   const [demoKey, setDemoKey] = useState(0);
+  const puzzleIndexRef = useRef(0);
 
   const runDemo = useCallback(async () => {
     setSolvedMsg(false);
     const newBoard = emptyBoard();
     setBoard([...newBoard]);
     setCurrentStats({ guess: '—', entropy: '—', wordsLeft: '2309' });
+
+    const puzzle = DEMO_PUZZLES[puzzleIndexRef.current % DEMO_PUZZLES.length];
+    const DEMO_GUESSES = puzzle.guesses;
+    const DEMO_STATS = puzzle.stats;
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     await sleep(800); // initial pause
@@ -98,7 +160,8 @@ const WordleDemo = () => {
     setSolvedMsg(true);
     await sleep(PAUSE_AFTER_WIN);
 
-    // Restart
+    // Advance to next puzzle and restart
+    puzzleIndexRef.current = (puzzleIndexRef.current + 1) % DEMO_PUZZLES.length;
     setDemoKey((k) => k + 1);
   }, []);
 
