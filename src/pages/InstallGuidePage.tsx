@@ -130,7 +130,7 @@ export const InstallGuidePage = () => {
       title: 'OPEN CHROME EXTENSIONS',
       desc: 'CLICK THIS CARD TO COPY THE EXTENSIONS ADDRESS.',
       code: 'chrome://extensions',
-      actionLabel: 'COPY'
+      actionLabel: 'COPY URL'
     },
     {
       id: 3,
@@ -520,7 +520,7 @@ export const InstallGuidePage = () => {
                     fontSize: '12px',
                     color: 'var(--accent-green)',
                     letterSpacing: '0.15em',
-                    fontWeight: 700,
+                    fontWeight: 800,
                     textTransform: 'uppercase',
                     display: 'flex',
                     alignItems: 'center',
@@ -529,7 +529,7 @@ export const InstallGuidePage = () => {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    {step.actionLabel}
+                    <strong>{step.actionLabel}</strong>
                   </div>
                 )}
               </div>
