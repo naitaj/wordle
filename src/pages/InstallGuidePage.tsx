@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 export const InstallGuidePage = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -113,16 +113,10 @@ export const InstallGuidePage = () => {
   const handleCardClick = (stepId: number) => {
     switch (stepId) {
       case 1:
-        window.location.href = 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip';
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
         break;
       case 2:
-        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD!');
-        try {
-          window.open('chrome://extensions', '_blank');
-        } catch (e) {
-          // ignore popup blocker
-        }
+        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD! OPENING PAGE...');
         break;
       case 3:
         copyText('In chrome://extensions, toggle on the "Developer mode" switch in the top-right corner.', '📋 COPIED DEVELOPER MODE INSTRUCTION!');
@@ -131,7 +125,7 @@ export const InstallGuidePage = () => {
         copyText('extension/dist', '📋 COPIED PATH "extension/dist" TO CLIPBOARD!');
         break;
       case 5:
-        window.open('https://wordleunlimited.org/', '_blank');
+        // Open NYT in a new tab, Wordle Unlimited opens via native href
         window.open('https://www.nytimes.com/games/wordle/index.html', '_blank');
         showToast('🎯 OPENED GAME SITES IN NEW TABS!');
         break;
@@ -247,14 +241,23 @@ export const InstallGuidePage = () => {
         {/* Steps List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', marginBottom: '100px' }}>
           {steps.map((step, index) => (
-            <motion.div
+            <motion.a
               key={step.id}
               ref={(el) => { stepRefs.current[index] = el; }}
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              onClick={() => handleCardClick(step.id)}
+              href={
+                step.id === 1 ? 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip' :
+                step.id === 2 ? 'chrome://extensions' :
+                step.id === 5 ? 'https://wordleunlimited.org/' : undefined
+              }
+              target={step.id !== 3 && step.id !== 4 ? '_blank' : undefined}
+              rel={step.id !== 3 && step.id !== 4 ? 'noopener noreferrer' : undefined}
+              onClick={() => {
+                handleCardClick(step.id);
+              }}
               whileHover={{ scale: 1.01 }}
               style={{
                 display: 'flex',
@@ -265,7 +268,9 @@ export const InstallGuidePage = () => {
                 padding: '40px',
                 alignItems: 'flex-start',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                textDecoration: 'none',
+                color: 'inherit'
               }}
               className="flex-col md:flex-row"
             >
@@ -373,7 +378,7 @@ export const InstallGuidePage = () => {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </motion.a>
           ))}
         </div>
 
