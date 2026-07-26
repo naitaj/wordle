@@ -84,10 +84,9 @@ export const InstallGuidePage = () => {
     {
       id: 2,
       title: 'OPEN CHROME EXTENSIONS',
-      desc: "OPEN YOUR BROWSER'S EXTENSION MANAGEMENT PAGE.",
+      desc: "Chrome security prohibits websites from launching chrome:// links directly. Click anywhere on this card to copy 'chrome://extensions' to your clipboard.",
       code: 'chrome://extensions',
-      link: { text: 'OPEN CHROME EXTENSIONS', url: 'chrome://extensions' },
-      actionLabel: 'OPEN CHROME EXTENSIONS'
+      actionLabel: 'CLICK TO COPY "chrome://extensions"'
     },
     {
       id: 3,
@@ -117,7 +116,7 @@ export const InstallGuidePage = () => {
         showToast('🚀 DOWNLOADING EXTENSION ZIP FILE...');
         break;
       case 2:
-        showToast('🚀 OPENING CHROME EXTENSIONS PAGE...');
+        copyText('chrome://extensions', '📋 COPIED "chrome://extensions" TO CLIPBOARD! Open a new tab (Ctrl+T) and paste.');
         break;
       case 3:
         setIsStep3Expanded(prev => !prev);
@@ -251,11 +250,10 @@ export const InstallGuidePage = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               href={
                 step.id === 1 ? 'https://github.com/naitaj/wordle/archive/refs/heads/main.zip' :
-                step.id === 2 ? 'chrome://extensions' :
                 step.id === 5 ? 'https://wordleunlimited.org/' : undefined
               }
-              target={step.id !== 3 && step.id !== 4 ? '_blank' : undefined}
-              rel={step.id !== 3 && step.id !== 4 ? 'noopener noreferrer' : undefined}
+              target={step.id === 1 || step.id === 5 ? '_blank' : undefined}
+              rel={step.id === 1 || step.id === 5 ? 'noopener noreferrer' : undefined}
               onClick={() => {
                 handleCardClick(step.id);
               }}
@@ -357,6 +355,21 @@ export const InstallGuidePage = () => {
                       {step.link.text}
                     </a>
                   )
+                )}
+
+                {step.id === 2 && (
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '12px 16px',
+                    backgroundColor: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-primary)',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    color: 'var(--text-secondary)',
+                    lineHeight: '1.5'
+                  }}>
+                    🔒 <strong>Chrome Security Note:</strong> Web browsers block all external sites from opening <code>chrome://</code> pages automatically. Click this card to copy the link, then press <code>Ctrl+T</code> (or <code>Cmd+T</code>) to open a new tab and paste it. Alternatively, click Chrome Menu (<strong>⋮</strong>) → <strong>Extensions</strong> → <strong>Manage Extensions</strong>.
+                  </div>
                 )}
 
                  {step.id === 3 && isStep3Expanded && (
