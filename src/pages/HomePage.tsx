@@ -321,51 +321,123 @@ export const HomePage = () => {
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', paddingBottom: '100px' }}>
         
-        {/* HERO SECTION */}
+        {/* HERO SECTION — Split Layout */}
         <motion.section 
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '100px' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '48px',
+            marginBottom: '100px',
+            flexWrap: 'wrap',
+          }}
         >
-          <motion.div variants={itemVariants} style={{
-            width: '80px', height: '80px', backgroundColor: '#000000', color: '#ffffff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '48px', fontFamily: '"Anton", sans-serif', marginBottom: '24px',
-            borderRadius: '12px'
-          }}>
-            W
+          {/* Left Column — Title & Description */}
+          <motion.div
+            variants={itemVariants}
+            style={{
+              flex: '1 1 440px',
+              minWidth: '320px',
+              textAlign: 'left',
+            }}
+          >
+            <motion.div variants={itemVariants} style={{
+              width: '72px', height: '72px', backgroundColor: '#000000', color: '#ffffff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '42px', fontFamily: '"Anton", sans-serif', marginBottom: '24px',
+              borderRadius: '12px'
+            }}>
+              W
+            </motion.div>
+            
+            <motion.h1 variants={itemVariants} style={{
+              fontFamily: '"Anton", sans-serif', fontSize: 'clamp(48px, 6vw, 88px)',
+              lineHeight: '1', margin: '0', textTransform: 'uppercase', letterSpacing: '0.02em'
+            }}>
+              WORDLE<br/>
+              <span style={{ color: 'var(--accent-green)' }}>ENTROPY</span>
+            </motion.h1>
+            
+            <motion.h2 variants={itemVariants} style={{
+              fontFamily: '"Roboto Condensed", sans-serif', fontSize: '22px', letterSpacing: '0.35em',
+              marginTop: '16px', marginBottom: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase'
+            }}>
+              AUTONOMOUS SOLVER
+            </motion.h2>
+            
+            <motion.p variants={itemVariants} style={{
+              fontFamily: '"Inter", sans-serif', fontSize: '17px', maxWidth: '520px',
+              color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '36px'
+            }}>
+              Solve Wordle using Information Theory. Uses entropy to maximize information gained from every guess. Helps solve Wordle efficiently. Works directly inside supported Wordle websites. Fast, intelligent and lightweight.
+            </motion.p>
+            
+            <motion.div variants={itemVariants} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <Link to="/download" className="btn-primary">
+                DOWNLOAD EXTENSION
+              </Link>
+              <Link to="/install" className="btn-secondary">
+                HOW IT WORKS
+              </Link>
+            </motion.div>
           </motion.div>
-          
-          <motion.h1 variants={itemVariants} style={{
-            fontFamily: '"Anton", sans-serif', fontSize: 'clamp(60px, 8vw, 100px)',
-            lineHeight: '1', margin: '0', textTransform: 'uppercase', letterSpacing: '0.02em'
-          }}>
-            WORDLE<br/>
-            <span style={{ color: 'var(--accent-green)' }}>ENTROPY</span>
-          </motion.h1>
-          
-          <motion.h2 variants={itemVariants} style={{
-            fontFamily: '"Roboto Condensed", sans-serif', fontSize: '24px', letterSpacing: '0.35em',
-            marginTop: '16px', marginBottom: '24px', color: 'var(--text-secondary)', textTransform: 'uppercase'
-          }}>
-            AUTONOMOUS SOLVER
-          </motion.h2>
-          
-          <motion.p variants={itemVariants} style={{
-            fontFamily: '"Inter", sans-serif', fontSize: '18px', maxWidth: '600px',
-            color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '40px'
-          }}>
-            Solve Wordle using Information Theory. Uses entropy to maximize information gained from every guess. Helps solve Wordle efficiently. Works directly inside supported Wordle websites. Fast, intelligent and lightweight.
-          </motion.p>
-          
-          <motion.div variants={itemVariants} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Link to="/download" className="btn-primary">
-              DOWNLOAD EXTENSION
-            </Link>
-            <Link to="/install" className="btn-secondary">
-              HOW IT WORKS
-            </Link>
+
+          {/* Right Column — Live Video Demonstration */}
+          <motion.div
+            variants={itemVariants}
+            initial={{ opacity: 0, x: 30, scale: 0.96 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              flex: '1 1 440px',
+              minWidth: '320px',
+              maxWidth: '580px',
+              position: 'relative',
+            }}
+          >
+            {/* Ambient Green Glow */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '85%',
+              height: '85%',
+              background: 'radial-gradient(ellipse, rgba(21, 128, 61, 0.14) 0%, transparent 70%)',
+              filter: 'blur(45px)',
+              pointerEvents: 'none',
+              zIndex: 0,
+            }} />
+            
+            {/* Video Card Container */}
+            <div style={{
+              position: 'relative',
+              zIndex: 1,
+              borderRadius: '16px',
+              border: '1.5px solid #15803d',
+              overflow: 'hidden',
+              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(21, 128, 61, 0.1)',
+              background: 'var(--bg-card)',
+            }}>
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                  borderRadius: '14px',
+                }}
+              >
+                <source src="/hero-demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </motion.div>
         </motion.section>
 

@@ -245,9 +245,8 @@ chrome.runtime.onMessage.addListener((message: PopupMessage, sender, sendRespons
 // ─── Extension Install Handler ───
 
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log('[Wordle Solver] Extension installed.');
   const config = await loadConfig();
   await saveConfig(config); // Ensure defaults are persisted
 });
 
-console.log('[Wordle Solver] Service worker loaded.');
+// Service worker loaded

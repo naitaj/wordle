@@ -89,8 +89,11 @@ export function Footer() {
               {[
                 { label: 'NYT Wordle', url: 'https://www.nytimes.com/games/wordle/index.html' },
                 { label: 'Wordle Unlimited', url: 'https://wordleunlimited.org/' },
+                { label: 'Hello Wordl', url: 'https://hellowordl.net/' },
                 { label: 'Quordle', url: 'https://www.merriam-webster.com/games/quordle/' },
                 { label: 'Octordle', url: 'https://octordle.com/' },
+                { label: 'Dordle', url: 'https://dordle.io/' },
+                { label: 'Sedecordle', url: 'https://sedecordle.com/' },
               ].map(site => (
                 <a key={site.url} href={site.url} target="_blank" rel="noopener noreferrer" style={{
                   color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', display: 'block', breakInside: 'avoid',

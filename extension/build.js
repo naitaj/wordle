@@ -70,11 +70,7 @@ async function runBuild() {
     path.join(distDir, 'manifest.json')
   );
   
-  // content.css
-  fs.copyFileSync(
-    path.join(extRoot, 'src/content/content.css'),
-    path.join(distDir, 'content.css')
-  );
+  // content.css is no longer needed — all styles are embedded in the Shadow DOM
   
   // icons/
   const srcIconsDir = path.join(extRoot, 'icons');

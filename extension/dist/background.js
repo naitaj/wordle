@@ -12016,8 +12016,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	return true;
 });
 chrome.runtime.onInstalled.addListener(async () => {
-	console.log("[Wordle Solver] Extension installed.");
 	await saveConfig(await loadConfig());
 });
-console.log("[Wordle Solver] Service worker loaded.");
 //#endregion

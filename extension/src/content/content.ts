@@ -6,8 +6,8 @@ const DEFAULT_TYPING_DELAY = 120; // ms between keystrokes
 let typingDelay = DEFAULT_TYPING_DELAY;
 let currentMode: 'auto' | 'assist' = 'auto';
 
-// Active Adapter Detection
-const activeAdapter: GameAdapter | null = detectActiveAdapter();
+// Active Adapter Detection — deferred to avoid triggering site boot-time detectors
+let activeAdapter: GameAdapter | null = null;
 
 // ─── DOM Interaction Helpers ───
 
@@ -339,11 +339,21 @@ function createStatusBadge(): HTMLElement {
     });
   });
 
-  document.addEventListener('click', (e) => {
-    if (!e.composedPath().includes(wrapper)) {
-      dropdown.classList.remove('show');
+  // Close dropdown when clicking outside — scoped to shadow root to avoid detection
+  shadowRoot.addEventListener('click', (e) => {
+    if (!e.composedPath().includes(menuBtn)) {
+      // Allow clicks on the dropdown items themselves
     }
   });
+  // Use a passive, non-detectable approach for outside clicks
+  const onDocClick = (e: MouseEvent) => {
+    if (!e.composedPath().includes(host)) {
+      dropdown.classList.remove('show');
+    }
+  };
+  // Attach to host's shadow root click-away detection via capture phase
+  // This avoids monkey-patched addEventListener detection on document
+  window.addEventListener('pointerdown', onDocClick as any, true);
 
   wrapper.appendChild(badge);
   wrapper.appendChild(menuBtn);
@@ -449,20 +459,36 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 // ─── Initialization ───
-const isWebsite = window.location.hostname.includes('localhost') || 
-                  window.location.hostname.includes('vercel.app') ||
-                  window.location.pathname.endsWith('/check');
+// Deferred initialization to avoid detection during site boot-up phase.
+// Clone sites often run detection scripts during their initial load;
+// waiting until the browser is idle ensures we don't trigger them.
+function initializeExtension(): void {
+  const isWebsite = window.location.hostname.includes('localhost') || 
+                    window.location.hostname.includes('vercel.app') ||
+                    window.location.pathname.endsWith('/check');
 
-if (isWebsite) {
-  document.documentElement.dataset.wordleEntropySolverInstalled = 'true';
-  window.dispatchEvent(new CustomEvent('WORDLE_SOLVER_INSTALLED'));
+  // Detect the active adapter now, after site boot-up is complete
+  activeAdapter = detectActiveAdapter();
+
+  if (isWebsite) {
+    document.documentElement.dataset.wordleEntropySolverInstalled = 'true';
+    window.dispatchEvent(new CustomEvent('WORDLE_SOLVER_INSTALLED'));
+  } else {
+    createStatusBadge();
+    chrome.storage.local.get(['solverMode'], (result) => {
+      if (chrome.runtime.lastError) return;
+      if (result.solverMode === 'auto' || result.solverMode === 'assist') {
+        currentMode = result.solverMode;
+        updateBadgeModeIndicator();
+      }
+    });
+  }
+}
+
+// Use requestIdleCallback to defer initialization until the browser is idle,
+// or fall back to a 1.5s setTimeout if requestIdleCallback is not available.
+if (typeof requestIdleCallback === 'function') {
+  requestIdleCallback(() => initializeExtension(), { timeout: 3000 });
 } else {
-  createStatusBadge();
-  chrome.storage.local.get(['solverMode'], (result) => {
-    if (chrome.runtime.lastError) return;
-    if (result.solverMode === 'auto' || result.solverMode === 'assist') {
-      currentMode = result.solverMode;
-      updateBadgeModeIndicator();
-    }
-  });
+  setTimeout(initializeExtension, 1500);
 }

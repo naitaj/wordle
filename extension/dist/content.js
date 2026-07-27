@@ -1212,7 +1212,7 @@ function detectActiveAdapter() {
 var DEFAULT_TYPING_DELAY = 120;
 var typingDelay = DEFAULT_TYPING_DELAY;
 var currentMode = "auto";
-var activeAdapter = detectActiveAdapter();
+var activeAdapter = null;
 var assistLoopTimeout = null;
 function stopAssistLoop() {
 	if (assistLoopTimeout !== null) {
@@ -1495,9 +1495,13 @@ function createStatusBadge() {
 			}
 		});
 	});
-	document.addEventListener("click", (e) => {
-		if (!e.composedPath().includes(wrapper)) dropdown.classList.remove("show");
+	shadowRoot.addEventListener("click", (e) => {
+		if (!e.composedPath().includes(menuBtn)) {}
 	});
+	const onDocClick = (e) => {
+		if (!e.composedPath().includes(host)) dropdown.classList.remove("show");
+	};
+	window.addEventListener("pointerdown", onDocClick, true);
 	wrapper.appendChild(badge);
 	wrapper.appendChild(menuBtn);
 	wrapper.appendChild(dropdown);
@@ -1599,17 +1603,23 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	handler();
 	return true;
 });
-if (window.location.hostname.includes("localhost") || window.location.hostname.includes("vercel.app") || window.location.pathname.endsWith("/check")) {
-	document.documentElement.dataset.wordleEntropySolverInstalled = "true";
-	window.dispatchEvent(new CustomEvent("WORDLE_SOLVER_INSTALLED"));
-} else {
-	createStatusBadge();
-	chrome.storage.local.get(["solverMode"], (result) => {
-		if (chrome.runtime.lastError) return;
-		if (result.solverMode === "auto" || result.solverMode === "assist") {
-			currentMode = result.solverMode;
-			updateBadgeModeIndicator();
-		}
-	});
+function initializeExtension() {
+	const isWebsite = window.location.hostname.includes("localhost") || window.location.hostname.includes("vercel.app") || window.location.pathname.endsWith("/check");
+	activeAdapter = detectActiveAdapter();
+	if (isWebsite) {
+		document.documentElement.dataset.wordleEntropySolverInstalled = "true";
+		window.dispatchEvent(new CustomEvent("WORDLE_SOLVER_INSTALLED"));
+	} else {
+		createStatusBadge();
+		chrome.storage.local.get(["solverMode"], (result) => {
+			if (chrome.runtime.lastError) return;
+			if (result.solverMode === "auto" || result.solverMode === "assist") {
+				currentMode = result.solverMode;
+				updateBadgeModeIndicator();
+			}
+		});
+	}
 }
+if (typeof requestIdleCallback === "function") requestIdleCallback(() => initializeExtension(), { timeout: 3e3 });
+else setTimeout(initializeExtension, 1500);
 //#endregion
